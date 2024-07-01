@@ -17,6 +17,8 @@ player.CameraData = {
     ["CamSpeed"] = 500
 }
 
+local jumped = false
+
 function player:load(world)
     self.body = love.physics.newBody(world, 200, 0, "dynamic")
     self.body:setLinearDamping(1)
@@ -27,10 +29,14 @@ function player:load(world)
 end
 
 function player:update(dt)
-    self.grounded = false
+    self.MovementData.OnGround = false
+
+    if not love.keyboard.isDown("space") then
+        jumped = false
+    end
     
     if #self.body:getContacts() >= 1 then -- should add wall jumping
-        self.grounded = true
+        self.MovementData.OnGround = true
     end
 
     -- if love.keyboard.isDown("d") then 
