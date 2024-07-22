@@ -5,9 +5,6 @@ local sprite = require("modules.sprite")
 
 function love.load()
     world:setCallbacks(beginContact, endContact)
-
-    love.window.setFullscreen(true)
-
     sprite:Init()
     player:load(world)
     level:init(world)
