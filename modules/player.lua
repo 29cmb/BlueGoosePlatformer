@@ -1,6 +1,7 @@
 local player = {}
 local sprite = require("modules.sprite")
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
+local respawning = false
 player.MovementData = {
     ["Speed"] = 9000,
     ["MaxSpeed"] = 400,
@@ -30,11 +31,16 @@ function player:load(world)
     self.body:setLinearDamping(1)
     self.shape = love.physics.newRectangleShape(50, 50)
     self.fixture = love.physics.newFixture(self.body, self.shape)
-    self.fixture:setUserData("player")
+    self.fixture:setUserData("Player")
     self.fixture:setRestitution(0)
 end
 
 function player:update(dt)
+    if respawning == true then 
+        self:Respawn()
+        respawning = false
+        return
+    end
     self.MovementData.OnGround = false
 
     if not love.keyboard.isDown("space") then
@@ -91,6 +97,10 @@ end
 function player:Respawn()
     self.body:setX(0)
     self.body:setY(0)
+end
+
+function player:YeildRespawn()
+    respawning = true
 end
 
 return player

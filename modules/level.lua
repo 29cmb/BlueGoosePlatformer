@@ -29,7 +29,7 @@ function level:loadLevel(path)
         local body = love.physics.newBody(world, hazard.X + (65 / 2), hazard.Y + (65 / 2), "static")
         local shape = love.physics.newRectangleShape(65, 65)
         local fixture = love.physics.newFixture(body, shape)
-        fixture:setUserData("Spike")
+        fixture:setUserData("Hazard")
 
         table.insert(self.map, {
             ["body"] = body,
