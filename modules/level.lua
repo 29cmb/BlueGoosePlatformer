@@ -1,5 +1,6 @@
 local level = {}
 local player = require("modules.player")
+local sprite = require("modules.sprite")
 level.map = {}
 
 function level:init(w)
@@ -23,6 +24,21 @@ function level:loadLevel(path)
             ["type"] = "Platform"
         })
     end
+
+    for _,hazard in pairs(data.Hazards) do 
+        local body = love.physics.newBody(world, hazard.X + (65 / 2), hazard.Y + (65 / 2), "static")
+        local shape = love.physics.newRectangleShape(65, 65)
+        local fixture = love.physics.newFixture(body, shape)
+        fixture:setUserData("Spike")
+
+        table.insert(self.map, {
+            ["body"] = body,
+            ["shape"] = shape,
+            ["fixture"] = fixture,
+            ["transform"] = {hazard.X, hazard.Y},
+            ["type"] = "Spike"
+        })
+    end
 end
 
 function level:draw()
@@ -32,6 +48,8 @@ function level:draw()
                 love.graphics.setColor(platform.color.R, platform.color.B, platform.color.G)
                 love.graphics.rectangle("fill", platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, platform.transform[3], platform.transform[4])
                 love.graphics.setColor(1, 1, 1)
+            elseif platform.type == "Spike" then
+                love.graphics.draw(sprite.Sprites.Spike, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY)
             end
         end
     end

@@ -1,10 +1,11 @@
 local player = {}
+local sprite = require("modules.sprite")
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
 player.MovementData = {
-    ["Speed"] = 5000,
+    ["Speed"] = 9000,
     ["MaxSpeed"] = 400,
-    ["Direction"] = 1,
-    ["JumpHeight"] = 1500,
+    ["Direction"] = -1,
+    ["JumpHeight"] = 1800,
     ["OnGround"] = false,
 }
 
@@ -25,7 +26,7 @@ end
 local jumped = false
 
 function player:load(world)
-    self.body = love.physics.newBody(world, 200, 0, "dynamic")
+    self.body = love.physics.newBody(world, 0, 0, "dynamic")
     self.body:setLinearDamping(1)
     self.shape = love.physics.newRectangleShape(50, 50)
     self.fixture = love.physics.newFixture(self.body, self.shape)
@@ -79,10 +80,17 @@ function player:update(dt)
     
     self.CameraData.CameraX = cX - self.CameraData.CameraOffsetX
     self.CameraData.CameraY = cY - self.CameraData.CameraOffsetY
+
+    if self.body:getY() > 600 then self:Respawn() end
 end
 
 function player:draw()
-    love.graphics.draw(love.graphics.newImage("images/player.png"), self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
+    love.graphics.draw(sprite.Sprites.Player, self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
+end
+
+function player:Respawn()
+    self.body:setX(0)
+    self.body:setY(0)
 end
 
 return player

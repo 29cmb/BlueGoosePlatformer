@@ -1,14 +1,12 @@
 local world = love.physics.newWorld(0, 1000, true)
 local player = require("modules.player")
 local level = require("modules.level")
-local Sprites = {}
+local sprite = require("modules.sprite")
 
 function love.load()
-    for name,spr in pairs(Sprites) do 
-        Sprites[name] = love.graphics.newImage(spr)
-    end
     world:setCallbacks(beginContact, endContact)
-
+    
+    sprite:Init()
     player:load(world)
     level:init(world)
     level:loadLevel("levels.test")
