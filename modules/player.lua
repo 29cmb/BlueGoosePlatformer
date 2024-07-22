@@ -41,6 +41,7 @@ function player:update(dt)
         respawning = false
         return
     end
+    
     self.MovementData.OnGround = false
 
     if not love.keyboard.isDown("space") then
@@ -99,7 +100,7 @@ function player:Respawn()
     self.body:setY(0)
 end
 
-function player:YeildRespawn()
+function player:YieldRespawn()
     respawning = true
 end
 

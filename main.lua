@@ -6,6 +6,8 @@ local sprite = require("modules.sprite")
 function love.load()
     world:setCallbacks(beginContact, endContact)
 
+    love.window.setFullscreen(true)
+
     sprite:Init()
     player:load(world)
     level:init(world)
@@ -25,9 +27,8 @@ end
 
 function beginContact(a, b)
     if a:getUserData() == "Player" and b:getUserData() == "Hazard" then 
-        player:YeildRespawn()
+        player:YieldRespawn()
     end
-    -- handle death and stuff like that
 end
 
 function endContact() end
