@@ -7,7 +7,6 @@ function love.load()
     for name,spr in pairs(Sprites) do 
         Sprites[name] = love.graphics.newImage(spr)
     end
-
     world:setCallbacks(beginContact, endContact)
 
     player:load(world)
@@ -16,6 +15,7 @@ function love.load()
 end
 
 function love.draw()
+    love.graphics.setBackgroundColor(1, 1, 1)
     player:draw()
     level:draw()
 end

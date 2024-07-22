@@ -1,5 +1,5 @@
 local level = {}
-
+local player = require("modules.player")
 level.map = {}
 
 function level:init(w)
@@ -19,6 +19,7 @@ function level:loadLevel(path)
             ["shape"] = shape,
             ["fixture"] = fixture,
             ["transform"] = {platform.X, platform.Y, platform.W, platform.H},
+            ["color"] = {R = platform.Color.R, G = platform.Color.G, B = platform.Color.B},
             ["type"] = "Platform"
         })
     end
@@ -28,7 +29,9 @@ function level:draw()
     if self.map ~= {} then 
         for _,platform in pairs(self.map) do 
             if platform.type == "Platform" then
-                love.graphics.rectangle("fill", platform.transform[1], platform.transform[2], platform.transform[3], platform.transform[4])
+                love.graphics.setColor(platform.color.R, platform.color.B, platform.color.G)
+                love.graphics.rectangle("fill", platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, platform.transform[3], platform.transform[4])
+                love.graphics.setColor(1, 1, 1)
             end
         end
     end

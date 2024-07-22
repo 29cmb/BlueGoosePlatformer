@@ -1,5 +1,4 @@
 local player = {}
-local debug = true
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
 player.MovementData = {
     ["Speed"] = 5000,
@@ -16,6 +15,12 @@ player.CameraData = {
     ["CameraOffsetY"] = 200,
     ["CamSpeed"] = 500
 }
+
+local cX, cY = 0, 0
+
+local function lerp(a, b, t)
+    return t < 0.5 and a + (b - a) * t or b + (a - b) * (1 - t)
+end
 
 local jumped = false
 
@@ -38,14 +43,6 @@ function player:update(dt)
     if #self.body:getContacts() >= 1 then -- should add wall jumping
         self.MovementData.OnGround = true
     end
-
-    -- if love.keyboard.isDown("d") then 
-    --     self.body:applyForce(400, 0)
-    -- elseif love.keyboard.isDown("a") then 
-    --     self.body:applyForce(-400, 0)
-    -- elseif love.keyboard.isDown("space") and self.grounded == true then 
-    --     self.body:applyForce(0, 400)
-    -- end
 
     for key, data in pairs(movementDirections) do 
         if love.keyboard.isDown(key) then 
@@ -76,13 +73,16 @@ function player:update(dt)
     elseif velX < -self.MovementData.MaxSpeed then velX = -self.MovementData.MaxSpeed end
 
     self.body:setLinearVelocity(velX, velY)
+
+    cX = lerp(cX, self.body:getX(), 0.1)
+    cY = lerp(cY, self.body:getY(), 0.1)
+    
+    self.CameraData.CameraX = cX - self.CameraData.CameraOffsetX
+    self.CameraData.CameraY = cY - self.CameraData.CameraOffsetY
 end
 
 function player:draw()
-    love.graphics.draw(love.graphics.newImage("images/player.png"), self.body:getX() - 25, self.body:getY() - 25)
-    if debug then 
-        love.graphics.rectangle("line", self.body:getX() - 25, self.body:getY() - 25, 50, 50)
-    end
+    love.graphics.draw(love.graphics.newImage("images/player.png"), self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
 end
 
 return player
