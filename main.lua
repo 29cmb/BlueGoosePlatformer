@@ -6,8 +6,10 @@ local sprite = require("modules.sprite")
 function love.load()
     world:setCallbacks(beginContact, endContact)
     sprite:Init()
-    player:load(world)
     level:init(world)
+
+    -- Load a test level
+    player:load(world)
     level:loadLevel("levels.test")
 end
 

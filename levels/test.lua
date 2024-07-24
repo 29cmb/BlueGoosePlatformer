@@ -1,4 +1,5 @@
-return {
+return { 
+    ["Start"] = {["X"] = 0, ["Y"] = -100},
     ["Platforms"] = {
         {
             ["X"] = -50,

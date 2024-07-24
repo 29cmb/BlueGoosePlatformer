@@ -1,5 +1,6 @@
 local player = {}
 local sprite = require("modules.sprite")
+local level = require("modules.level")
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
 local respawning = false
 player.MovementData = {
@@ -15,7 +16,7 @@ player.CameraData = {
     ["CameraY"] = 0,
     ["CameraOffsetX"] = 400,
     ["CameraOffsetY"] = 200,
-    ["CamSpeed"] = 500
+    ["CamSpeed"] = 300
 }
 
 local cX, cY = 0, 0
@@ -41,7 +42,7 @@ function player:update(dt)
         respawning = false
         return
     end
-    
+
     self.MovementData.OnGround = false
 
     if not love.keyboard.isDown("space") then
@@ -96,8 +97,13 @@ function player:draw()
 end
 
 function player:Respawn()
-    self.body:setX(0)
-    self.body:setY(0)
+    if level.map.Start then 
+        self.body:setX(level.map.Start.X or 0)
+        self.body:setY(level.map.Start.Y or 0)
+    else
+        self.body:setX(0)
+        self.body:setY(0)
+    end 
 end
 
 function player:YieldRespawn()

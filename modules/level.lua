@@ -1,14 +1,15 @@
 local level = {}
-local player = require("modules.player")
 local sprite = require("modules.sprite")
 level.map = {}
 
 function level:init(w)
     world = w
+    player = require("modules.player")
 end
 
 function level:loadLevel(path)
     local data = require(path)
+    if data.Start then self.map.Start = data.Start end
     for _,platform in pairs(data.Platforms) do 
         local body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")
         local shape = love.physics.newRectangleShape(platform.W, platform.H)
@@ -38,6 +39,11 @@ function level:loadLevel(path)
             ["transform"] = {hazard.X, hazard.Y},
             ["type"] = "Spike"
         })
+    end
+
+    if self.map.Start then 
+        player.body:setX(self.map.Start.X)
+        player.body:setY(self.map.Start.Y)
     end
 end
 
