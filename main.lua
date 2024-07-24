@@ -4,8 +4,8 @@ local level = require("modules.level")
 local sprite = require("modules.sprite")
 
 function love.load()
+    if sprite.IsLoaded == false then sprite:Init() end
     world:setCallbacks(beginContact, endContact)
-    sprite:Init()
     level:init(world)
 
     -- Load a test level

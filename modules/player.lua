@@ -93,7 +93,7 @@ function player:update(dt)
 end
 
 function player:draw()
-    love.graphics.draw(sprite.Sprites.Player, self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
+    love.graphics.draw(sprite.Player, self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
 end
 
 function player:Respawn()

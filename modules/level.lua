@@ -41,6 +41,21 @@ function level:loadLevel(path)
         })
     end
 
+    for _,gate in pairs(data.Gates) do 
+        local body = love.physics.newBody(world, gate.X + (gate.W / 2), gate.Y + (gate.H / 2), "static")
+        local shape = love.physics.newRectangleShape(gate.W, gate.H)
+        local fixture = love.physics.newFixture(body, shape)
+        fixture:setUserData("Gate")
+
+        table.insert(self.map, {
+            ["body"] = body,
+            ["shape"] = shape,
+            ["fixture"] = fixture,
+            ["transform"] = {gate.X, gate.Y, gate.W, gate.H},
+            ["type"] = "Gate"
+        })
+    end
+
     if self.map.Start then 
         player.body:setX(self.map.Start.X)
         player.body:setY(self.map.Start.Y)
@@ -55,7 +70,9 @@ function level:draw()
                 love.graphics.rectangle("fill", platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, platform.transform[3], platform.transform[4])
                 love.graphics.setColor(1, 1, 1)
             elseif platform.type == "Spike" then
-                love.graphics.draw(sprite.Sprites.Spike, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY)
+                love.graphics.draw(sprite.Spike, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY)
+            elseif platform.type == "Gate" then 
+                love.graphics.draw(sprite.Water, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 643, platform.transform[4] / 360)
             end
         end
     end
