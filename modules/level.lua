@@ -78,4 +78,16 @@ function level:draw()
     end
 end
 
+function level:Water(toggle)
+    for _,gate in pairs(self.map) do 
+        if gate.type == "Gate" then
+            if toggle == true then 
+                gate.fixture:setCategory(2)
+            else
+                gate.fixture:setCategory(1)
+            end 
+        end
+    end 
+end
+
 return level

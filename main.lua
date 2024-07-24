@@ -24,6 +24,12 @@ function love.update(dt)
    world:update(dt)
 end
 
+function love.keypressed(key) 
+    if key == "j" then 
+        player:WaterToggle()
+    end
+end
+
 function beginContact(a, b)
     if a:getUserData() == "Player" and b:getUserData() == "Hazard" then 
         player:YieldRespawn()

@@ -19,6 +19,8 @@ player.CameraData = {
     ["CamSpeed"] = 300
 }
 
+player.IsWater = false
+
 local cX, cY = 0, 0
 
 local function lerp(a, b, t)
@@ -34,6 +36,8 @@ function player:load(world)
     self.fixture = love.physics.newFixture(self.body, self.shape)
     self.fixture:setUserData("Player")
     self.fixture:setRestitution(0)
+    self.fixture:setCategory(1)
+    self.fixture:setMask(2)
 end
 
 function player:update(dt)
@@ -93,7 +97,7 @@ function player:update(dt)
 end
 
 function player:draw()
-    love.graphics.draw(sprite.Player, self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
+    love.graphics.draw((self.IsWater == true) and sprite.WaterPlayer or sprite.Player, self.body:getX() - self.CameraData.CameraX, self.body:getY() - self.CameraData.CameraY, 0, self.MovementData.Direction, 1, 25, 25)
 end
 
 function player:Respawn()
@@ -108,6 +112,11 @@ end
 
 function player:YieldRespawn()
     respawning = true
+end
+
+function player:WaterToggle()
+    level:Water(not self.IsWater)
+    self.IsWater = not self.IsWater
 end
 
 return player
