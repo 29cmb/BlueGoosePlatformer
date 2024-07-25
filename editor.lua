@@ -66,10 +66,6 @@ local mX, mY = 0, 0
 local placingPlatform = false
 
 function editor:Draw()
-    love.graphics.setColor(1, 1, 1, 0.5)
-    love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
-    love.graphics.setColor(1,1,1,1)
-
     for _,platform in pairs(level.Platforms) do
         love.graphics.setColor(platform.Color.R, platform.Color.B, platform.Color.G)
         love.graphics.rectangle("fill", platform.X + self.CameraData.CameraX, platform.Y + self.CameraData.CameraY, platform.W, platform.H)
@@ -79,6 +75,19 @@ function editor:Draw()
     for _,hazard in pairs(level.Hazards) do
         love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
     end
+
+    if placingPlatform == true then 
+        local sX = math.abs(love.mouse.getX() - mX)
+        local sY = math.abs(love.mouse.getY() - mY)
+
+        love.graphics.setColor(0,1,0,0.5)
+        love.graphics.rectangle("fill", math.min(mX, love.mouse.getX()), math.min(mY, love.mouse.getY()), sX, sY)
+        love.graphics.setColor(1,1,1,1)
+    end
+
+    love.graphics.setColor(1, 1, 1, 0.5)
+    love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
+    love.graphics.setColor(1,1,1,1)
     
     for _,button in pairs(buttons) do 
         love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
@@ -145,8 +154,8 @@ function editor:MouseReleased(x, y)
         local sY = math.abs(y - mY)
 
         table.insert(level.Platforms, {
-            ["X"] = mX - self.CameraData.CameraX,
-            ["Y"] = mY - self.CameraData.CameraY,
+            ["X"] = math.min(mX, x) - self.CameraData.CameraX,
+            ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
             ["W"] = sX,
             ["H"] = sY,
             ["Color"] = {
@@ -155,6 +164,8 @@ function editor:MouseReleased(x, y)
                 ["B"] = 0
             }
         })
+
+        placingPlatform = false
     end
 end
 
