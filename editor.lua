@@ -18,6 +18,8 @@ local level = {
     ["Gates"] = {}
 }
 
+local placeMode = "none"
+
 function editor:Load()
     level = {
         ["Start"] = {["X"] = 0, ["Y"] = 0},
@@ -28,19 +30,17 @@ function editor:Load()
 
     buttons = {
         {
-            ["Sprite"] = Sprites.Player,
-            ["Transform"] = {10, 10, 50, 50},
+            ["Sprite"] = Sprites.PlayerButton,
+            ["Transform"] = {10, 10, 75, 75},
             ["IsVisible"] = function()
                 return true
             end,
-            ["Callback"] = function()
-                print("Calling back!")
+            ["Callback"] = function(self)
+                placeMode = "startPos"
             end
         }
     }
 end
-
-local firstDrawCall = true
 
 function editor:Draw()
     love.graphics.setColor(1, 1, 1, 0.5)
@@ -69,10 +69,18 @@ end
 
 function editor:MousePressed(x, y, button)
     if button == 1 then 
+        local buttonPressed = false
         for _,btn in pairs(buttons) do 
             if btn.IsVisible() == true and utils:CheckCollision(x, y, 1, 1, btn.Transform[1], btn.Transform[2], btn.Transform[3], btn.Transform[4]) then 
-                btn.Callback()
+                btn.Callback(editor)
+                buttonPressed = true
             end
+        end
+
+        if buttonPressed == true then return end
+        if placeMode == "startPos" then 
+            level.Start.X = x - self.CameraData.CameraX - 10
+            level.Start.Y = y - self.CameraData.CameraY - 10
         end
     end
 end
