@@ -1,3 +1,4 @@
+![The Goose Rainbow](images/TheGooseRainbow.png)
 # Blue Goose Platformer
 You're a goose...but blue!
 
