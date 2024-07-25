@@ -4,7 +4,8 @@ local sprite = {
     ["Water"] = "images/water.jpg",
     ["WaterPlayer"] = "images/water_player.png",
     ["PlayerButton"] = "images/PlayerButton.png",
-    ["SpikeButton"] = "images/SpikeButton.png"
+    ["SpikeButton"] = "images/SpikeButton.png",
+    ["PlatformButton"] = "images/PlatformButton.png"
 }
 sprite.IsLoaded = false
 

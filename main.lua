@@ -40,6 +40,10 @@ function love.mousepressed(x, y, button)
     if editor.InEditor == true then editor:MousePressed(x, y, button) end    
 end
 
+function love.mousereleased(x, y)
+    if editor.InEditor == true then editor:MouseReleased(x, y) end
+end
+
 function beginContact(a, b)
     if a:getUserData() == "Player" and b:getUserData() == "Hazard" then 
         player:YieldRespawn()

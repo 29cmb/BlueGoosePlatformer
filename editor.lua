@@ -48,27 +48,40 @@ function editor:Load()
             ["Callback"] = function(self)
                 placeMode = "spike"
             end
+        },
+        {
+            ["Sprite"] = Sprites.PlatformButton,
+            ["Transform"] = {170, 10, 75, 75},
+            ["IsVisible"] = function() 
+                return true
+            end,
+            ["Callback"] = function(self)
+                placeMode = "platform"
+            end
         }
     }
 end
+
+local mX, mY = 0, 0
+local placingPlatform = false
 
 function editor:Draw()
     love.graphics.setColor(1, 1, 1, 0.5)
     love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
     love.graphics.setColor(1,1,1,1)
 
-    for _,button in pairs(buttons) do 
-        love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
-    end
-
     for _,platform in pairs(level.Platforms) do
         love.graphics.setColor(platform.Color.R, platform.Color.B, platform.Color.G)
-        love.graphics.rectangle("fill", platform.Transform[1] - self.CameraData.CameraX, platform.Transform[2] - self.CameraData.CameraY, platform.Transform[3], platform.Transform[4])
+        love.graphics.rectangle("fill", platform.X + self.CameraData.CameraX, platform.Y + self.CameraData.CameraY, platform.W, platform.H)
         love.graphics.setColor(1, 1, 1)
     end
 
     for _,hazard in pairs(level.Hazards) do
         love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
+    end
+    
+    for _,button in pairs(buttons) do 
+        love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
     end
 end
 
@@ -119,7 +132,29 @@ function editor:MousePressed(x, y, button)
                     ["Type"] = "Spike" 
                 })
             end
+        elseif placeMode == "platform" then
+            placingPlatform = true
+            mX, mY = x, y
         end
+    end
+end
+
+function editor:MouseReleased(x, y)
+    if placingPlatform == true then 
+        local sX = math.abs(x - mX)
+        local sY = math.abs(y - mY)
+
+        table.insert(level.Platforms, {
+            ["X"] = mX - self.CameraData.CameraX,
+            ["Y"] = mY - self.CameraData.CameraY,
+            ["W"] = sX,
+            ["H"] = sY,
+            ["Color"] = {
+                ["R"] = 0,
+                ["G"] = 0,
+                ["B"] = 0
+            }
+        })
     end
 end
 
