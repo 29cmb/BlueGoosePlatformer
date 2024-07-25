@@ -101,12 +101,24 @@ function editor:MousePressed(x, y, button)
         if placeMode == "startPos" then 
             level.Start.X = x - self.CameraData.CameraX - 10
             level.Start.Y = y - self.CameraData.CameraY - 10
-        elseif placeMode == "spike" then 
-            table.insert(level.Hazards, {
-                ["X"] = x - self.CameraData.CameraX - 40,
-                ["Y"] = y - self.CameraData.CameraY - 40,
-                ["Type"] = "Spike" 
-            })
+        elseif placeMode == "spike" then
+            local CanPlace = true
+
+            for _, hazard in ipairs(level.Hazards) do
+                local distance = math.sqrt((hazard.X - (x - self.CameraData.CameraX - 40))^2 + (hazard.Y - (y - self.CameraData.CameraY - 40))^2)
+                if distance <= 25 then
+                    CanPlace = false
+                    break
+                end
+            end
+
+            if CanPlace == true then 
+                table.insert(level.Hazards, {
+                    ["X"] = x - self.CameraData.CameraX - 40,
+                    ["Y"] = y - self.CameraData.CameraY - 40,
+                    ["Type"] = "Spike" 
+                })
+            end
         end
     end
 end
