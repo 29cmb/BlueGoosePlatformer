@@ -67,6 +67,19 @@ function editor:Load()
             ["Callback"] = function(self)
                 placeMode = "platform"
             end
+        },
+        {
+            ["Sprite"] = Sprites.WaterButton,
+            ["Transform"] = {250, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function() 
+                return placeMode == "waterPlatform"
+            end,
+            ["Callback"] = function()
+                placemode = "waterPlatform"
+            end
         }
     }
 end
@@ -83,6 +96,10 @@ function editor:Draw()
 
     for _,hazard in pairs(level.Hazards) do
         love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
+    end
+
+    for _,gate in pairs(level.Gates) do 
+        love.graphics.draw(Sprites.Water, gate.X - self.CameraData.CameraX, gate.Y - self.CameraData.CameraY, 0, gate.W / 643, gate.H / 360)
     end
 
     if placingPlatform == true then 
@@ -106,7 +123,6 @@ function editor:Draw()
         else
             love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
         end
-        
     end
 end
 
@@ -157,7 +173,7 @@ function editor:MousePressed(x, y, button)
                     ["Type"] = "Spike" 
                 })
             end
-        elseif placeMode == "platform" then
+        elseif placeMode == "platform" or placemode == "waterPlatform" then
             placingPlatform = true
             mX, mY = x, y
         end
@@ -169,19 +185,34 @@ function editor:MouseReleased(x, y)
         local sX = math.abs(x - mX)
         local sY = math.abs(y - mY)
 
-        table.insert(level.Platforms, {
-            ["X"] = math.min(mX, x) - self.CameraData.CameraX,
-            ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
-            ["W"] = sX,
-            ["H"] = sY,
-            ["Color"] = {
-                ["R"] = 0,
-                ["G"] = 0,
-                ["B"] = 0
-            }
-        })
+        if placemode == "platform" then 
+            print("platform")
+            table.insert(level.Platforms, {
+                ["X"] = math.min(mX, x) - self.CameraData.CameraX,
+                ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
+                ["W"] = sX,
+                ["H"] = sY,
+                ["Color"] = {
+                    ["R"] = 0,
+                    ["G"] = 0,
+                    ["B"] = 0
+                }
+            })
+        elseif placemode == "waterPlatform" then
+            print("water")
+            table.insert(level.Gates, {
+                ["X"] = math.min(mX, x) - self.CameraData.CameraX,
+                ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
+                ["W"] = sX,
+                ["H"] = sY,
+            })
+        else
+            print(placemode)
+        end
+        
 
         placingPlatform = false
+        mX, mY = 0, 0
     end
 end
 
