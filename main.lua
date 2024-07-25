@@ -2,9 +2,11 @@ local world = love.physics.newWorld(0, 1000, true)
 local player = require("modules.player")
 local level = require("modules.level")
 local sprite = require("modules.sprite")
+local editor = require("editor")
 
 function love.load()
     if sprite.IsLoaded == false then sprite:Init() end
+    if editor.InEditor == true then editor:Load() return end
     world:setCallbacks(beginContact, endContact)
     level:init(world)
 
@@ -15,16 +17,20 @@ end
 
 function love.draw()
     love.graphics.setBackgroundColor(1, 1, 1)
+    if editor.InEditor == true then editor:Draw() return end
+    
     player:draw()
     level:draw()
 end
 
 function love.update(dt)
-   player:update(dt)
-   world:update(dt)
+    if editor.InEditor == true then editor:Update(dt) return end
+    player:update(dt)
+    world:update(dt)
 end
 
-function love.keypressed(key) 
+function love.keypressed(key)
+    if editor.InEditor == true then editor:Keypressed(key) return end
     if key == "j" then 
         player:WaterToggle()
     end
