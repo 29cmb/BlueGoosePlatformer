@@ -38,6 +38,16 @@ function editor:Load()
             ["Callback"] = function(self)
                 placeMode = "startPos"
             end
+        },
+        {
+            ["Sprite"] = Sprites.SpikeButton,
+            ["Transform"] = {90, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Callback"] = function(self)
+                placeMode = "spike"
+            end
         }
     }
 end
@@ -49,6 +59,16 @@ function editor:Draw()
 
     for _,button in pairs(buttons) do 
         love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+    end
+
+    for _,platform in pairs(level.Platforms) do
+        love.graphics.setColor(platform.Color.R, platform.Color.B, platform.Color.G)
+        love.graphics.rectangle("fill", platform.Transform[1] - self.CameraData.CameraX, platform.Transform[2] - self.CameraData.CameraY, platform.Transform[3], platform.Transform[4])
+        love.graphics.setColor(1, 1, 1)
+    end
+
+    for _,hazard in pairs(level.Hazards) do
+        love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
     end
 end
 
@@ -81,6 +101,12 @@ function editor:MousePressed(x, y, button)
         if placeMode == "startPos" then 
             level.Start.X = x - self.CameraData.CameraX - 10
             level.Start.Y = y - self.CameraData.CameraY - 10
+        elseif placeMode == "spike" then 
+            table.insert(level.Hazards, {
+                ["X"] = x - self.CameraData.CameraX - 40,
+                ["Y"] = y - self.CameraData.CameraY - 40,
+                ["Type"] = "Spike" 
+            })
         end
     end
 end

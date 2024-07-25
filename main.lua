@@ -30,7 +30,7 @@ function love.update(dt)
 end
 
 function love.keypressed(key)
-    if editor.InEditor == true then editor:Keypressed(key) return end
+    if editor.InEditor == true then return end
     if key == "j" then 
         player:WaterToggle()
     end
