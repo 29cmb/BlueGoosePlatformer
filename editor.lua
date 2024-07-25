@@ -35,6 +35,9 @@ function editor:Load()
             ["IsVisible"] = function()
                 return true
             end,
+            ["Selected"] = function()
+                return placeMode == "startPos"
+            end,
             ["Callback"] = function(self)
                 placeMode = "startPos"
             end
@@ -45,6 +48,9 @@ function editor:Load()
             ["IsVisible"] = function()
                 return true
             end,
+            ["Selected"] = function()
+                return placeMode == "spike"
+            end,
             ["Callback"] = function(self)
                 placeMode = "spike"
             end
@@ -54,6 +60,9 @@ function editor:Load()
             ["Transform"] = {170, 10, 75, 75},
             ["IsVisible"] = function() 
                 return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "platform"
             end,
             ["Callback"] = function(self)
                 placeMode = "platform"
@@ -89,8 +98,15 @@ function editor:Draw()
     love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
     love.graphics.setColor(1,1,1,1)
     
-    for _,button in pairs(buttons) do 
-        love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+    for _,button in pairs(buttons) do
+        if button.Selected() then
+            love.graphics.setColor(0.8,0.8,0.8)
+            love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+            love.graphics.setColor(1,1,1,1)
+        else
+            love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+        end
+        
     end
 end
 
