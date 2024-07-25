@@ -78,7 +78,7 @@ function editor:Load()
                 return placeMode == "waterPlatform"
             end,
             ["Callback"] = function()
-                placemode = "waterPlatform"
+                placeMode = "waterPlatform"
             end
         }
     }
@@ -99,7 +99,7 @@ function editor:Draw()
     end
 
     for _,gate in pairs(level.Gates) do 
-        love.graphics.draw(Sprites.Water, gate.X - self.CameraData.CameraX, gate.Y - self.CameraData.CameraY, 0, gate.W / 643, gate.H / 360)
+        love.graphics.draw(Sprites.Water, gate.X + self.CameraData.CameraX, gate.Y + self.CameraData.CameraY, 0, gate.W / 643, gate.H / 360)
     end
 
     if placingPlatform == true then 
@@ -173,7 +173,7 @@ function editor:MousePressed(x, y, button)
                     ["Type"] = "Spike" 
                 })
             end
-        elseif placeMode == "platform" or placemode == "waterPlatform" then
+        elseif placeMode == "platform" or placeMode == "waterPlatform" then
             placingPlatform = true
             mX, mY = x, y
         end
@@ -181,11 +181,11 @@ function editor:MousePressed(x, y, button)
 end
 
 function editor:MouseReleased(x, y)
-    if placingPlatform == true then 
+    if placingPlatform == true then
         local sX = math.abs(x - mX)
         local sY = math.abs(y - mY)
 
-        if placemode == "platform" then 
+        if placeMode == "platform" then 
             print("platform")
             table.insert(level.Platforms, {
                 ["X"] = math.min(mX, x) - self.CameraData.CameraX,
@@ -198,8 +198,7 @@ function editor:MouseReleased(x, y)
                     ["B"] = 0
                 }
             })
-        elseif placemode == "waterPlatform" then
-            print("water")
+        elseif placeMode == "waterPlatform" then
             table.insert(level.Gates, {
                 ["X"] = math.min(mX, x) - self.CameraData.CameraX,
                 ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
@@ -207,7 +206,7 @@ function editor:MouseReleased(x, y)
                 ["H"] = sY,
             })
         else
-            print(placemode)
+            print(placeMode)
         end
         
 
