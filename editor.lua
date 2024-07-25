@@ -8,7 +8,7 @@ editor.CameraData = {
     ["CamSpeed"] = 300
 }
 
-local directions = {a = {-1,0}, d = {1,0}, w = {0,1}, s = {0,-1}}
+local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 
 local level = {
     ["Start"] = {["X"] = 0, ["Y"] = 0},
@@ -37,8 +37,8 @@ local cX, cY = 0, 0
 function editor:Update(dt)
     for key, data in pairs(directions) do 
         if love.keyboard.isDown(key) then 
-            cX = (self.CameraData.CamSpeed / 50) * data[1]
-            cY = (self.CameraData.CamSpeed / 50) * data[2]
+            cX = self.CameraData.CamSpeed * data[1] * dt
+            cY = self.CameraData.CamSpeed * data[2] * dt
         end
     end
 
