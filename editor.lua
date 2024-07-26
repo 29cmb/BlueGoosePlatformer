@@ -1,12 +1,12 @@
 local editor = {}
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
-editor.InEditor = true
+editor.InEditor = false
 
 editor.CameraData = {
     ["CameraX"] = 400,
     ["CameraY"] = 200,
-    ["CamSpeed"] = 300
+    ["CamSpeed"] = 500
 }
 
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
@@ -95,7 +95,9 @@ function editor:Draw()
     end
 
     for _,hazard in pairs(level.Hazards) do
-        love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
+        if hazard.Type == "Spike" then 
+            love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
+        end
     end
 
     for _,gate in pairs(level.Gates) do 

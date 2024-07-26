@@ -26,19 +26,34 @@ function level:loadLevel(path)
         })
     end
 
-    for _,hazard in pairs(data.Hazards) do 
-        local body = love.physics.newBody(world, hazard.X + (65 / 2), hazard.Y + (65 / 2), "static")
-        local shape = love.physics.newRectangleShape(65, 65)
-        local fixture = love.physics.newFixture(body, shape)
-        fixture:setUserData("Hazard")
+    for _,hazard in pairs(data.Hazards) do
+        if hazard.Type == "Spike" then 
+            local body = love.physics.newBody(world, hazard.X + (65 / 2), hazard.Y + (65 / 2), "static")
+            local shape = love.physics.newRectangleShape(65, 65)
+            local fixture = love.physics.newFixture(body, shape)
+            fixture:setUserData("Spike")
 
-        table.insert(self.map, {
-            ["body"] = body,
-            ["shape"] = shape,
-            ["fixture"] = fixture,
-            ["transform"] = {hazard.X, hazard.Y},
-            ["type"] = "Spike"
-        })
+            table.insert(self.map, {
+                ["body"] = body,
+                ["shape"] = shape,
+                ["fixture"] = fixture,
+                ["transform"] = {hazard.X, hazard.Y},
+                ["type"] = "Spike"
+            })
+        elseif hazard.Type == "Sponge" then 
+            local body = love.physics.newBody(world, hazard.X + (hazard.W / 2), hazard.Y + (hazard.H / 2), "static")
+            local shape = love.physics.newRectangleShape(hazard.W, hazard.H)
+            local fixture = love.physics.newFixture(body, shape)
+            fixture:setUserData("Sponge")
+
+            table.insert(self.map, {
+                ["body"] = body,
+                ["shape"] = shape,
+                ["fixture"] = fixture,
+                ["transform"] = {hazard.X, hazard.Y, hazard.W, hazard.H},
+                ["type"] = "Sponge"
+            })
+        end
     end
 
     for _,gate in pairs(data.Gates) do 
@@ -56,6 +71,10 @@ function level:loadLevel(path)
         })
     end
 
+    -- TODO
+    -- Make it so when you're in water mode, spikes don't kill
+    -- Add sponges that kill you when in water mode
+
     if self.map.Start then 
         player.body:setX(self.map.Start.X)
         player.body:setY(self.map.Start.Y)
@@ -71,6 +90,8 @@ function level:draw()
                 love.graphics.setColor(1, 1, 1)
             elseif platform.type == "Spike" then
                 love.graphics.draw(sprite.Spike, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY)
+            elseif platform.type == "Sponge" then 
+                love.graphics.draw(sprite.Sponge, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 536, platform.transform[4] / 350)
             elseif platform.type == "Gate" then 
                 love.graphics.draw(sprite.Water, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 643, platform.transform[4] / 360)
             end

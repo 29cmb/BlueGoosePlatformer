@@ -112,6 +112,8 @@ end
 
 function player:YieldRespawn()
     respawning = true
+    level:Water(false)
+    self.IsWater = false
 end
 
 function player:WaterToggle()

@@ -19,8 +19,8 @@ function love.draw()
     love.graphics.setBackgroundColor(1, 1, 1)
     if editor.InEditor == true then editor:Draw() return end
     
-    player:draw()
     level:draw()
+    player:draw()
 end
 
 function love.update(dt)
@@ -45,8 +45,12 @@ function love.mousereleased(x, y)
 end
 
 function beginContact(a, b)
-    if a:getUserData() == "Player" and b:getUserData() == "Hazard" then 
-        player:YieldRespawn()
+    if a:getUserData() == "Player" then
+        if b:getUserData() == "Spike" and player.IsWater == false then 
+            player:YieldRespawn()
+        elseif b:getUserData() == "Sponge" and player.IsWater == true then
+            player:YieldRespawn()
+        end 
     end
 end
 
