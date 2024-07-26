@@ -93,6 +93,19 @@ function editor:Load()
             ["Callback"] = function()
                 placeMode = "sponge"
             end
+        },
+        {
+            ["Sprite"] = Sprites.WinButton,
+            ["Transform"] = {410, 10, 75, 75},
+            ["IsVisible"] = function() 
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "win"
+            end,
+            ["Callback"] = function()
+                placeMode = "win"
+            end
         }
     }
 end
@@ -131,6 +144,12 @@ function editor:Draw()
     love.graphics.setColor(1, 1, 1, 0.5)
     love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
     love.graphics.setColor(1,1,1,1)
+
+    if level.End then 
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.draw(Sprites.EndFlag, level.End.X + self.CameraData.CameraX, level.End.Y + self.CameraData.CameraY)
+        love.graphics.setColor(1,1,1,1)
+    end
     
     for _,button in pairs(buttons) do
         if button.Selected() then
@@ -193,6 +212,11 @@ function editor:MousePressed(x, y, button)
         elseif placeMode == "platform" or placeMode == "waterPlatform" or placeMode == "sponge" then
             placingPlatform = true
             mX, mY = x, y
+        elseif placeMode == "win" then
+            level.End = {
+                ["X"] = x - self.CameraData.CameraX - 40,
+                ["Y"] = y - self.CameraData.CameraY - 40,
+            }
         end
     end
 end
@@ -230,8 +254,6 @@ function editor:MouseReleased(x, y)
                 ["H"] = sY,
                 ["Type"] = "Sponge"
             })
-        else
-            print(placeMode)
         end
         
 
