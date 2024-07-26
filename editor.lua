@@ -1,7 +1,7 @@
 local editor = {}
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
-editor.InEditor = false
+editor.InEditor = true
 
 editor.CameraData = {
     ["CameraX"] = 400,
@@ -80,6 +80,19 @@ function editor:Load()
             ["Callback"] = function()
                 placeMode = "waterPlatform"
             end
+        },
+        {
+            ["Sprite"] = Sprites.SpongeButton,
+            ["Transform"] = {330, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "sponge"
+            end,
+            ["Callback"] = function()
+                placeMode = "sponge"
+            end
         }
     }
 end
@@ -97,6 +110,8 @@ function editor:Draw()
     for _,hazard in pairs(level.Hazards) do
         if hazard.Type == "Spike" then 
             love.graphics.draw(Sprites.Spike, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY)
+        elseif hazard.Type == "Sponge" then
+            love.graphics.draw(Sprites.Sponge, hazard.X + self.CameraData.CameraX, hazard.Y + self.CameraData.CameraY, 0, hazard.W / 536, hazard.H / 350)
         end
     end
 
@@ -147,7 +162,7 @@ function editor:MousePressed(x, y, button)
     if button == 1 then 
         local buttonPressed = false
         for _,btn in pairs(buttons) do 
-            if btn.IsVisible() == true and utils:CheckCollision(x, y, 1, 1, btn.Transform[1], btn.Transform[2], btn.Transform[3], btn.Transform[4]) then 
+            if btn.IsVisible() and utils:CheckCollision(x, y, 1, 1, btn.Transform[1], btn.Transform[2], btn.Transform[3], btn.Transform[4]) then 
                 btn.Callback(editor)
                 buttonPressed = true
             end
@@ -175,7 +190,7 @@ function editor:MousePressed(x, y, button)
                     ["Type"] = "Spike" 
                 })
             end
-        elseif placeMode == "platform" or placeMode == "waterPlatform" then
+        elseif placeMode == "platform" or placeMode == "waterPlatform" or placeMode == "sponge" then
             placingPlatform = true
             mX, mY = x, y
         end
@@ -195,7 +210,7 @@ function editor:MouseReleased(x, y)
                 ["W"] = sX,
                 ["H"] = sY,
                 ["Color"] = {
-                    ["R"] = 0,
+                    ["R"] = 1,
                     ["G"] = 0,
                     ["B"] = 0
                 }
@@ -206,6 +221,14 @@ function editor:MouseReleased(x, y)
                 ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
                 ["W"] = sX,
                 ["H"] = sY,
+            })
+        elseif placeMode == "sponge" then 
+            table.insert(level.Hazards, {
+                ["X"] = math.min(mX, x) - self.CameraData.CameraX,
+                ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
+                ["W"] = sX,
+                ["H"] = sY,
+                ["Type"] = "Sponge"
             })
         else
             print(placeMode)
