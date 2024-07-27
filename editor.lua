@@ -18,6 +18,37 @@ local level = {
     ["Gates"] = {}
 }
 
+local fileName = nil
+
+local function getFileCount(directory)
+    local count = 0
+    local items = love.filesystem.getDirectoryItems(directory)
+    for _, item in ipairs(items) do
+        if love.filesystem.getInfo(directory .. "/" .. item, "file") and item:match("%.bgoose$") then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function tableToString(tbl, indent)
+    local result = "{\n"
+    local nextIndent = indent .. "    "
+    for k, v in pairs(tbl) do
+        if type(k) == "string" then
+            k = string.format("%q", k)
+        end
+        if type(v) == "string" then
+            v = string.format("%q", v)
+        elseif type(v) == "table" then
+            v = tableToString(v, nextIndent)
+        end
+        result = result .. string.format("%s[%s] = %s,\n", nextIndent, k, v)
+    end
+    result = result .. indent .. "}"
+    return result
+end
+
 local placeMode = "none"
 
 function editor:Load()
@@ -117,7 +148,14 @@ function editor:Load()
                 return false
             end,
             ["Callback"] = function()
-                -- uh oh
+                if level.End then
+                    if fileName == nil then fileName = "Level" .. getFileCount("/") + 1 .. ".bgoose" end
+                    love.filesystem.setIdentity("blue-goose-platformer")
+                    love.filesystem.write(fileName, "return " .. tableToString(level, ""))
+                    love.window.showMessageBox("Saved", "Save was successful!")
+                else
+                    love.window.showMessageBox("Error", "You cannot save a level without an end flag!")
+                end
             end
         }
     }
@@ -172,6 +210,16 @@ function editor:Draw()
         else
             love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
         end
+    end
+
+    if fileName ~= nil then
+        love.graphics.push()
+        love.graphics.scale(2,2)
+        love.graphics.setColor(0,0,0)
+        love.graphics.print(fileName, 300, 20)
+        love.graphics.setColor(1,1,1)
+        love.graphics.scale(1,1)
+        love.graphics.pop()
     end
 end
 
