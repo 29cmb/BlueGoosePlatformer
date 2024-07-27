@@ -7,8 +7,7 @@ function level:init(w)
     player = require("modules.player")
 end
 
-function level:loadLevel(path)
-    local data = require(path)
+function level:loadLevel(data)
     if data.Start then self.map.Start = data.Start end
     for _,platform in pairs(data.Platforms) do 
         local body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")

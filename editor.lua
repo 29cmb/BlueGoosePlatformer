@@ -106,6 +106,19 @@ function editor:Load()
             ["Callback"] = function()
                 placeMode = "win"
             end
+        },
+        {
+            ["Sprite"] = Sprites.SaveButton,
+            ["Transform"] = {490, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return false
+            end,
+            ["Callback"] = function()
+                -- uh oh
+            end
         }
     }
 end

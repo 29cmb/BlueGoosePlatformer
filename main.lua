@@ -12,7 +12,7 @@ function love.load()
 
     -- Load a test level
     player:load(world)
-    level:loadLevel("levels.test")
+    level:loadLevel(require("levels.test"))
 end
 
 function love.draw()
