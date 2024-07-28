@@ -123,9 +123,22 @@ function editor:Load()
                 placeMode = "win"
             end
         },
+        ["Delete"] = {
+            ["Sprite"] = Sprites.DeleteButton,
+            ["Transform"] = {490, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "delete"
+            end,
+            ["Callback"] = function()
+                placeMode = "delete"
+            end
+        },
         ["Save"] = {
             ["Sprite"] = Sprites.SaveButton,
-            ["Transform"] = {490, 10, 75, 75},
+            ["Transform"] = {570, 10, 75, 75},
             ["IsVisible"] = function()
                 return true
             end,
@@ -141,7 +154,8 @@ function editor:Load()
                     love.window.showMessageBox("Error", "You cannot save a level without an end flag!", "error")
                 end
             end
-        }
+        },
+        
     }
     self.IsLoaded = true
 end
@@ -188,20 +202,23 @@ function editor:Draw()
     end
     
     for _,button in pairs(self.buttons) do
-        if button.Selected() then
-            love.graphics.setColor(0.8,0.8,0.8)
-            love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
-            love.graphics.setColor(1,1,1,1)
-        else
-            love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+        if button.IsVisible() then
+            if button.Selected() then
+                love.graphics.setColor(0.8,0.8,0.8)
+                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+                love.graphics.setColor(1,1,1,1)
+            else
+                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+            end
         end
+       
     end
 
     if fileName ~= nil then
         love.graphics.push()
         love.graphics.setFont(fonts.ValentinySubtext)
         love.graphics.setColor(0,0,0)
-        love.graphics.print(fileName, 575, 40)
+        love.graphics.printf(fileName, 190, 560, 600, "right")
         love.graphics.setColor(1,1,1)
         love.graphics.setFont(fonts.Valentiny)
         love.graphics.pop()
@@ -271,6 +288,24 @@ function editor:MousePressed(x, y, button)
                 ["X"] = x - self.CameraData.CameraX - 40,
                 ["Y"] = y - self.CameraData.CameraY - 40,
             }
+        elseif placeMode == "delete" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    table.remove(level.Platforms, index)
+                end
+            end
+
+            for index, value in pairs(level.Gates) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    table.remove(level.Gates, index)
+                end
+            end
+
+            for index, value in pairs(level.Hazards) do
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H or 65) then 
+                    table.remove(level.Hazards, index)
+                end
+            end
         end
     end
 end
