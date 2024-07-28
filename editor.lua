@@ -1,7 +1,7 @@
 local editor = {}
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
-editor.InEditor = true
+editor.InEditor = false
 
 editor.CameraData = {
     ["CameraX"] = 400,

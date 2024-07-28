@@ -8,6 +8,7 @@ function level:init(w)
 end
 
 function level:loadLevel(data)
+    print(data)
     if data.Start then self.map.Start = data.Start end
     for _,platform in pairs(data.Platforms) do 
         local body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")

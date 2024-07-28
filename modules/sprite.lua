@@ -11,7 +11,8 @@ local sprite = {
     ["SpongeButton"] = "images/SpongeButton.png",
     ["WinButton"] = "images/WinButton.png",
     ["EndFlag"] = "images/EndFlag.png",
-    ["SaveButton"] = "images/SaveButton.png"
+    ["SaveButton"] = "images/SaveButton.png",
+    ["MainMenu"] = "images/MainMenu.png"
 }
 sprite.IsLoaded = false
 
