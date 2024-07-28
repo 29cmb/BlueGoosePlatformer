@@ -233,8 +233,8 @@ function editor:Update(dt)
     if pause.Paused == true then return end
     for key, data in pairs(directions) do 
         if love.keyboard.isDown(key) then 
-            cX = self.CameraData.CamSpeed * data[1] * dt
-            cY = self.CameraData.CamSpeed * data[2] * dt
+            cX = cX + self.CameraData.CamSpeed * data[1] * dt
+            cY = cY + self.CameraData.CamSpeed * data[2] * dt
         end
     end
 

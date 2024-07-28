@@ -7,10 +7,13 @@ local editor = require("editor")
 local utils = require("modules.utils")
 local fonts = require("modules.font")
 local pause = require('modules.pause')
+local audio = require("modules.audio")
 
 local inMenu = true
 local levelPage = 1
 local pages = {}
+
+
 
 local function getFileCount(directory)
     local count = 0
@@ -61,6 +64,8 @@ local menuButtons = {
                 local data = love.filesystem.load(lvl)()
                 player:load(world)
                 level:loadLevel(data)
+                
+                audio.Ingame:play()
             end
         end
     },
@@ -122,13 +127,17 @@ local menuButtons = {
 
 function love.load()
     if sprite.IsLoaded == false then sprite:Init() end
+    if audio.IsLoaded == false then audio:Init() end
     if fonts.IsLoaded == false then fonts:Load() end
     if pause.IsLoaded == false then pause:Load() end
     if editor.InEditor == true then editor:Load() return end
     
     world:setCallbacks(beginContact, endContact)
     level:init(world)
-
+    
+    audio.Ingame:setVolume(0.5)
+    audio.Ingame:setLooping(true)
+    
     love.filesystem.setIdentity("blue-goose-platformer")
 end
 
@@ -199,6 +208,7 @@ end
 function endContact() end
 
 function main:Exit()
+    audio.Ingame:stop()
     inMenu = true
 end
 
