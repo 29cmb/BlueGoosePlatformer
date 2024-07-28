@@ -4,6 +4,7 @@ local level = require("modules.level")
 local sprite = require("modules.sprite")
 local editor = require("editor")
 local utils = require("modules.utils")
+local fonts = require("modules.font")
 
 local inMenu = true
 local levelPage = 1
@@ -18,6 +19,7 @@ local menuButtons = {
             if lvl then
                 love.filesystem.setIdentity("blue-goose-platformer")
                 inMenu = false
+
                 local data = love.filesystem.load(lvl)()
                 player:load(world)
                 level:loadLevel(data)
@@ -28,6 +30,7 @@ local menuButtons = {
 
 function love.load()
     if sprite.IsLoaded == false then sprite:Init() end
+    if fonts.IsLoaded == false then fonts:Load() end
     if editor.InEditor == true then editor:Load() return end
     world:setCallbacks(beginContact, endContact)
     level:init(world)
@@ -46,8 +49,12 @@ function love.draw()
     
     if inMenu == true then
         love.graphics.draw(sprite.MainMenu)
+        love.graphics.setColor(0,0,0)
+        love.graphics.setFont(fonts.Valentiny)
+        love.graphics.printf(pages[levelPage] or "You have no levels!", 60, 80, 400)
+        love.graphics.setColor(1,1,1)
     else
-       level:draw()
+        level:draw()
         player:draw() 
     end
     
