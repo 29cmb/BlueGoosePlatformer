@@ -302,7 +302,7 @@ function editor:MousePressed(x, y, button)
             end
 
             for index, value in pairs(level.Hazards) do
-                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H or 65) then 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W or 65, value.H or 65) then 
                     table.remove(level.Hazards, index)
                 end
             end
