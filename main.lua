@@ -13,8 +13,6 @@ local inMenu = true
 local levelPage = 1
 local pages = {}
 
-
-
 local function getFileCount(directory)
     local count = 0
     local items = love.filesystem.getDirectoryItems(directory)
@@ -64,7 +62,7 @@ local menuButtons = {
                 local data = love.filesystem.load(lvl)()
                 player:load(world)
                 level:loadLevel(data)
-                
+                audio.Menu:stop()
                 audio.Ingame:play()
             end
         end
@@ -137,6 +135,11 @@ function love.load()
     
     audio.Ingame:setVolume(0.5)
     audio.Ingame:setLooping(true)
+
+    audio.Menu:setVolume(0.5)
+    audio.Menu:setLooping(true)
+
+    audio.Menu:play()
     
     love.filesystem.setIdentity("blue-goose-platformer")
 end
@@ -209,6 +212,7 @@ function endContact() end
 
 function main:Exit()
     audio.Ingame:stop()
+    audio.Menu:play()
     inMenu = true
 end
 
