@@ -45,6 +45,20 @@ local menuButtons = {
                 levelPage = levelPage + 1
             end
         end
+    },
+    ["Delete"] = {
+        ["Transform"] = {355, 273, 94, 85},
+        ["Callback"] = function()
+            local buttonClicked = love.window.showMessageBox("Delete", "Are you sure you would like to delete this level?", {"No", "Yes"})
+            if buttonClicked == 2 then 
+                love.filesystem.remove(pages[levelPage])
+                if levelPage == 1 then 
+                    levelPage = #pages - 1
+                else 
+                    levelPage = levelPage - 1 
+                end
+            end
+        end
     }
 }
 
@@ -56,11 +70,6 @@ function love.load()
     level:init(world)
 
     love.filesystem.setIdentity("blue-goose-platformer")
-    for _, file in pairs(love.filesystem.getDirectoryItems("/")) do 
-        if love.filesystem.getInfo("/" .. file) and file:match("%.bgoose$") then
-            table.insert(pages, file)
-        end
-    end
 end
 
 function love.draw()
@@ -81,6 +90,13 @@ function love.draw()
 end
 
 function love.update(dt)
+    pages = {}
+    for _, file in pairs(love.filesystem.getDirectoryItems("/")) do 
+        if love.filesystem.getInfo("/" .. file) and file:match("%.bgoose$") then
+            table.insert(pages, file)
+        end
+    end
+
     if editor.InEditor == true then editor:Update(dt) return end
     if inMenu == false then player:update(dt) end
     world:update(dt)
