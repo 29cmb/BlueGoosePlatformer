@@ -25,6 +25,26 @@ local menuButtons = {
                 level:loadLevel(data)
             end
         end
+    },
+    ["Previous"] = {
+        ["Transform"] = {28, 266, 61, 96},
+        ["Callback"] = function()
+            if levelPage == 1 then 
+                levelPage = #pages
+            else
+                levelPage = levelPage - 1
+            end
+        end
+    },
+    ["Next"] = {
+        ["Transform"] = {713, 266, 61, 96},
+        ["Callback"] = function()
+            if levelPage == #pages then 
+                levelPage = 1
+            else
+                levelPage = levelPage + 1
+            end
+        end
     }
 }
 

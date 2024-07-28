@@ -17,7 +17,6 @@ local level = {
     ["Hazards"] = {},
     ["Gates"] = {}
 }
-
 local fileName = nil
 
 local function getFileCount(directory)
@@ -149,7 +148,7 @@ function editor:Load()
             end,
             ["Callback"] = function()
                 if level.End then
-                    if fileName == nil then fileName = "Level" .. getFileCount("/") + 1 .. ".bgoose" end
+                    if fileName == nil then fileName = "Level" .. getFileCount("/") + 2 .. ".bgoose" end
                     love.filesystem.setIdentity("blue-goose-platformer")
                     love.filesystem.write(fileName, "return " .. tableToString(level, ""))
                     love.window.showMessageBox("Saved", "Save was successful!")
