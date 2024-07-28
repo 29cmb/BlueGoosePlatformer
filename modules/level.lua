@@ -71,10 +71,6 @@ function level:loadLevel(data)
         })
     end
 
-    -- TODO
-    -- Make it so when you're in water mode, spikes don't kill
-    -- Add sponges that kill you when in water mode
-
     if self.map.Start then 
         player.body:setX(self.map.Start.X)
         player.body:setY(self.map.Start.Y)
@@ -83,6 +79,7 @@ end
 
 function level:Unload()
     self.map = {}
+    player:Unload()
 end
 
 function level:draw()

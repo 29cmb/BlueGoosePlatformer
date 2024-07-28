@@ -1,12 +1,16 @@
 local pause = {}
 pause.Paused = false
+pause.IsLoaded = false
 
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
+local level = require("modules.level")
 
 function pause:Load()
     main = require('main')
     editor = require("editor")
+
+    self.IsLoaded = true
 end
 
 function pause:Draw() 
@@ -25,7 +29,16 @@ local buttons = {
     ["Exit"] = {
         ["Transform"] = {200, 355, 397, 125},
         ["Callback"] = function()
-            -- next
+            if editor.InEditor == true then
+                local choice = love.window.showMessageBox("Save", "Would you like to save this level?", {"No", "Yes"})
+                if choice == 2 then editor.buttons.Save.Callback() end
+
+                editor.InEditor = false
+            else
+                main:Exit()
+                level:Unload()
+            end
+            pause.Paused = false
         end
     }
 }

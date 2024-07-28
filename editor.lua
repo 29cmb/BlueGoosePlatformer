@@ -44,8 +44,8 @@ end
 local placeMode = "none"
 
 function editor:Load()
-    buttons = {
-        {
+    self.buttons = {
+        ["Player"] = {
             ["Sprite"] = Sprites.PlayerButton,
             ["Transform"] = {10, 10, 75, 75},
             ["IsVisible"] = function()
@@ -58,7 +58,7 @@ function editor:Load()
                 placeMode = "startPos"
             end
         },
-        {
+        ["Spike"] = {
             ["Sprite"] = Sprites.SpikeButton,
             ["Transform"] = {90, 10, 75, 75},
             ["IsVisible"] = function()
@@ -71,7 +71,7 @@ function editor:Load()
                 placeMode = "spike"
             end
         },
-        {
+        ["Platform"] = {
             ["Sprite"] = Sprites.PlatformButton,
             ["Transform"] = {170, 10, 75, 75},
             ["IsVisible"] = function() 
@@ -84,7 +84,7 @@ function editor:Load()
                 placeMode = "platform"
             end
         },
-        {
+        ["Water"] = {
             ["Sprite"] = Sprites.WaterButton,
             ["Transform"] = {250, 10, 75, 75},
             ["IsVisible"] = function()
@@ -97,7 +97,7 @@ function editor:Load()
                 placeMode = "waterPlatform"
             end
         },
-        {
+        ["Sponge"] = {
             ["Sprite"] = Sprites.SpongeButton,
             ["Transform"] = {330, 10, 75, 75},
             ["IsVisible"] = function()
@@ -110,7 +110,7 @@ function editor:Load()
                 placeMode = "sponge"
             end
         },
-        {
+        ["Win"] ={
             ["Sprite"] = Sprites.WinButton,
             ["Transform"] = {410, 10, 75, 75},
             ["IsVisible"] = function() 
@@ -123,7 +123,7 @@ function editor:Load()
                 placeMode = "win"
             end
         },
-        {
+        ["Save"] = {
             ["Sprite"] = Sprites.SaveButton,
             ["Transform"] = {490, 10, 75, 75},
             ["IsVisible"] = function()
@@ -187,7 +187,7 @@ function editor:Draw()
         love.graphics.setColor(1,1,1,1)
     end
     
-    for _,button in pairs(buttons) do
+    for _,button in pairs(self.buttons) do
         if button.Selected() then
             love.graphics.setColor(0.8,0.8,0.8)
             love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
@@ -206,11 +206,14 @@ function editor:Draw()
         love.graphics.setFont(fonts.Valentiny)
         love.graphics.pop()
     end
+
+    pause:Draw()
 end
 
 local cX, cY = 0, 0
 
 function editor:Update(dt)
+    if pause.Paused == true then return end
     for key, data in pairs(directions) do 
         if love.keyboard.isDown(key) then 
             cX = self.CameraData.CamSpeed * data[1] * dt
@@ -226,10 +229,12 @@ end
 function editor:MousePressed(x, y, button)
     if pause.Paused then 
         pause:MouseClick(x, y)
+        return
     end
+
     if button == 1 then 
         local buttonPressed = false
-        for _,btn in pairs(buttons) do 
+        for _,btn in pairs(self.buttons) do 
             if btn.IsVisible() and utils:CheckCollision(x, y, 1, 1, btn.Transform[1], btn.Transform[2], btn.Transform[3], btn.Transform[4]) then 
                 btn.Callback(editor)
                 buttonPressed = true

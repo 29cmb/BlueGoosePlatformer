@@ -124,4 +124,11 @@ function player:WaterToggle()
     self.IsWater = not self.IsWater
 end
 
+function player:Unload()
+    self.body:destroy()
+    self.body = nil
+    self.fixture = nil
+    self.shape = nil
+end
+
 return player

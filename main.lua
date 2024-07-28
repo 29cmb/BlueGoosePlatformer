@@ -1,3 +1,4 @@
+local main = {}
 local world = love.physics.newWorld(0, 1000, true)
 local player = require("modules.player")
 local level = require("modules.level")
@@ -122,7 +123,9 @@ local menuButtons = {
 function love.load()
     if sprite.IsLoaded == false then sprite:Init() end
     if fonts.IsLoaded == false then fonts:Load() end
+    if pause.IsLoaded == false then pause:Load() end
     if editor.InEditor == true then editor:Load() return end
+    
     world:setCallbacks(beginContact, endContact)
     level:init(world)
 
@@ -163,13 +166,13 @@ end
 function love.keypressed(key)
     if key == "j" and editor.InEditor == false then 
         player:WaterToggle()
-    elseif key == "escape" and inMenu == false then
+    elseif key == "escape" and (inMenu == false or editor.InEditor == true) then
         pause.Paused = not pause.Paused
     end
 end
 
 function love.mousepressed(x, y, button)
-    if pause.Paused == true then pause:MouseClick(x, y) end
+    if pause.Paused == true then pause:MouseClick(x, y) return end
     if editor.InEditor == true then editor:MousePressed(x, y, button) return end
     if inMenu == true then 
         for _,btn in pairs(menuButtons) do 
@@ -195,3 +198,9 @@ function beginContact(a, b)
 end
 
 function endContact() end
+
+function main:Exit()
+    inMenu = true
+end
+
+return main
