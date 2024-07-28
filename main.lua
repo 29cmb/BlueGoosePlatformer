@@ -146,8 +146,7 @@ function love.draw()
         level:draw()
         player:draw()
         pause:Draw()
-    end
-    
+    end 
 end
 
 function love.update(dt)
