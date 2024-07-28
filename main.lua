@@ -10,6 +10,42 @@ local inMenu = true
 local levelPage = 1
 local pages = {}
 
+local function getFileCount(directory)
+    local count = 0
+    local items = love.filesystem.getDirectoryItems(directory)
+    for _, item in ipairs(items) do
+        if love.filesystem.getInfo(directory .. "/" .. item, "file") and item:match("%.bgoose$") then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function tableToString(tbl, indent)
+    local result = "{\n"
+    local nextIndent = indent .. "    "
+    for k, v in pairs(tbl) do
+        if type(k) == "string" then
+            k = string.format("%q", k)
+        end
+        if type(v) == "string" then
+            v = string.format("%q", v)
+        elseif type(v) == "table" then
+            v = tableToString(v, nextIndent)
+        end
+        result = result .. string.format("%s[%s] = %s,\n", nextIndent, k, v)
+    end
+    result = result .. indent .. "}"
+    return result
+end
+
+local defaultLevel = {
+    ["Start"] = {["X"] = 0, ["Y"] = 0},
+    ["Platforms"] = {},
+    ["Hazards"] = {},
+    ["Gates"] = {}
+}
+
 local menuButtons = {
     ["Play"] = {
         ["Transform"] = {26, 385, 267, 201},
@@ -59,6 +95,15 @@ local menuButtons = {
                 end
             end
         end
+    },
+    ["NewLevel"] = {
+        ["Transform"] = {265, 188, 275, 82},
+        ["Callback"] = function()
+            if #pages ~= 0 then levelPage = levelPage + 1 end
+            love.filesystem.setIdentity("blue-goose-platformer")
+            local name = "Level" .. getFileCount("/") + 1 .. ".bgoose"
+            love.filesystem.write(name, tableToString(defaultLevel, ""))
+        end
     }
 }
 
@@ -84,7 +129,7 @@ function love.draw()
         love.graphics.setColor(1,1,1)
     else
         level:draw()
-        player:draw() 
+        player:draw()
     end
     
 end
