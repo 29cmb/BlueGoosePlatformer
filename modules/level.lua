@@ -81,6 +81,10 @@ function level:loadLevel(data)
     end
 end
 
+function level:Unload()
+    self.map = {}
+end
+
 function level:draw()
     if self.map ~= {} then 
         for _,platform in pairs(self.map) do 

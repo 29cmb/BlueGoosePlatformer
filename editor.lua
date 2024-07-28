@@ -1,7 +1,9 @@
 local editor = {}
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
+local fonts = require("modules.font")
 editor.InEditor = false
+editor.IsLoaded = false
 
 editor.CameraData = {
     ["CameraX"] = 400,
@@ -17,18 +19,8 @@ local level = {
     ["Hazards"] = {},
     ["Gates"] = {}
 }
-local fileName = nil
 
-local function getFileCount(directory)
-    local count = 0
-    local items = love.filesystem.getDirectoryItems(directory)
-    for _, item in ipairs(items) do
-        if love.filesystem.getInfo(directory .. "/" .. item, "file") and item:match("%.bgoose$") then
-            count = count + 1
-        end
-    end
-    return count
-end
+local fileName = nil
 
 local function tableToString(tbl, indent)
     local result = "{\n"
@@ -51,13 +43,6 @@ end
 local placeMode = "none"
 
 function editor:Load()
-    level = {
-        ["Start"] = {["X"] = 0, ["Y"] = 0},
-        ["Platforms"] = {},
-        ["Hazards"] = {},
-        ["Gates"] = {}
-    } -- return level to defaults when the editor loads
-
     buttons = {
         {
             ["Sprite"] = Sprites.PlayerButton,
@@ -148,7 +133,6 @@ function editor:Load()
             end,
             ["Callback"] = function()
                 if level.End then
-                    if fileName == nil then fileName = "Level" .. getFileCount("/") + 2 .. ".bgoose" end
                     love.filesystem.setIdentity("blue-goose-platformer")
                     love.filesystem.write(fileName, "return " .. tableToString(level, ""))
                     love.window.showMessageBox("Saved", "Save was successful!")
@@ -158,6 +142,7 @@ function editor:Load()
             end
         }
     }
+    self.IsLoaded = true
 end
 
 local mX, mY = 0, 0
@@ -213,11 +198,11 @@ function editor:Draw()
 
     if fileName ~= nil then
         love.graphics.push()
-        love.graphics.scale(2,2)
+        love.graphics.setFont(fonts.ValentinySubtext)
         love.graphics.setColor(0,0,0)
-        love.graphics.print(fileName, 300, 20)
+        love.graphics.print(fileName, 575, 40)
         love.graphics.setColor(1,1,1)
-        love.graphics.scale(1,1)
+        love.graphics.setFont(fonts.Valentiny)
         love.graphics.pop()
     end
 end
@@ -320,6 +305,12 @@ function editor:MouseReleased(x, y)
         placingPlatform = false
         mX, mY = 0, 0
     end
+end
+
+function editor:LoadLevel(name, data)
+    level = data
+    fileName = name
+    self.InEditor = true
 end
 
 return editor

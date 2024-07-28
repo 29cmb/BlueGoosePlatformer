@@ -62,6 +62,17 @@ local menuButtons = {
             end
         end
     },
+    ["Edit"] = {
+        ["Transform"] = {406, 385, 267, 201},
+        ["Callback"] = function()
+            local lvl = pages[levelPage]
+            if lvl then
+                local data = love.filesystem.load(lvl)()
+                if editor.IsLoaded == false then editor:Load() end
+                editor:LoadLevel(lvl, data)
+            end
+        end
+    },
     ["Previous"] = {
         ["Transform"] = {28, 266, 61, 96},
         ["Callback"] = function()
@@ -102,7 +113,7 @@ local menuButtons = {
             if #pages ~= 0 then levelPage = levelPage + 1 end
             love.filesystem.setIdentity("blue-goose-platformer")
             local name = "Level" .. getFileCount("/") + 1 .. ".bgoose"
-            love.filesystem.write(name, tableToString(defaultLevel, ""))
+            love.filesystem.write(name, "return " .. tableToString(defaultLevel, ""))
         end
     }
 }
