@@ -75,6 +75,8 @@ local menuButtons = {
                 local data = love.filesystem.load(lvl)()
                 if editor.IsLoaded == false then editor:Load() end
                 editor:LoadLevel(lvl, data)
+                audio.Menu:stop()
+                audio.Editor:play()
             end
         end
     },
@@ -135,9 +137,12 @@ function love.load()
     
     audio.Ingame:setVolume(0.5)
     audio.Ingame:setLooping(true)
-
+    
     audio.Menu:setVolume(0.5)
     audio.Menu:setLooping(true)
+
+    audio.Editor:setVolume(0.5)
+    audio.Editor:setLooping(true)
 
     audio.Menu:play()
     
@@ -213,6 +218,7 @@ function endContact() end
 function main:Exit()
     audio.Ingame:stop()
     audio.Menu:play()
+    
     inMenu = true
 end
 

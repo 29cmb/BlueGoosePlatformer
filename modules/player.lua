@@ -5,6 +5,8 @@ local pause = require("modules.pause")
 local level = require("modules.level")
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
 local respawning = false
+
+
 player.MovementData = {
     ["Speed"] = 9000,
     ["MaxSpeed"] = 400,

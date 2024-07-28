@@ -5,6 +5,7 @@ pause.IsLoaded = false
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
 local level = require("modules.level")
+local audio = require("modules.audio")
 
 function pause:Load()
     main = require('main')
@@ -34,6 +35,8 @@ local buttons = {
                 if choice == 2 then editor.buttons.Save.Callback() end
 
                 editor.InEditor = false
+                audio.Editor:stop()
+                audio.Menu:play()
             else
                 main:Exit()
                 level:Unload()

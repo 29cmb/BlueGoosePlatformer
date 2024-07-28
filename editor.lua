@@ -3,6 +3,7 @@ local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
 local fonts = require("modules.font")
 local pause = require("modules.pause")
+
 editor.InEditor = false
 editor.IsLoaded = false
 

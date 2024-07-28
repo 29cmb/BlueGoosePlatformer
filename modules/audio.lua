@@ -1,6 +1,7 @@
 local audio = {
     ["Ingame"] = {"audio/main.mp3", "stream"},
-    ["Menu"] = {"audio/menu.mp3", "stream"}
+    ["Menu"] = {"audio/menu.mp3", "stream"},
+    ["Editor"] = {"audio/editor.mp3", "stream"}
 }
 audio.IsLoaded = false
 
