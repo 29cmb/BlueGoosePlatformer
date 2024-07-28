@@ -5,6 +5,7 @@ local sprite = require("modules.sprite")
 local editor = require("editor")
 local utils = require("modules.utils")
 local fonts = require("modules.font")
+local pause = require('modules.pause')
 
 local inMenu = true
 local levelPage = 1
@@ -141,6 +142,7 @@ function love.draw()
     else
         level:draw()
         player:draw()
+        pause:Draw()
     end
     
 end
@@ -159,13 +161,15 @@ function love.update(dt)
 end
 
 function love.keypressed(key)
-    if editor.InEditor == true then return end
-    if key == "j" then 
+    if key == "j" and editor.InEditor == false then 
         player:WaterToggle()
+    elseif key == "escape" and inMenu == false then
+        pause.Paused = not pause.Paused
     end
 end
 
-function love.mousepressed(x, y, button) 
+function love.mousepressed(x, y, button)
+    if pause.Paused == true then pause:MouseClick(x, y) end
     if editor.InEditor == true then editor:MousePressed(x, y, button) return end
     if inMenu == true then 
         for _,btn in pairs(menuButtons) do 

@@ -2,6 +2,7 @@ local editor = {}
 local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
 local fonts = require("modules.font")
+local pause = require("modules.pause")
 editor.InEditor = false
 editor.IsLoaded = false
 
@@ -137,7 +138,7 @@ function editor:Load()
                     love.filesystem.write(fileName, "return " .. tableToString(level, ""))
                     love.window.showMessageBox("Saved", "Save was successful!")
                 else
-                    love.window.showMessageBox("Error", "You cannot save a level without an end flag!")
+                    love.window.showMessageBox("Error", "You cannot save a level without an end flag!", "error")
                 end
             end
         }
@@ -223,6 +224,9 @@ function editor:Update(dt)
 end
 
 function editor:MousePressed(x, y, button)
+    if pause.Paused then 
+        pause:MouseClick(x, y)
+    end
     if button == 1 then 
         local buttonPressed = false
         for _,btn in pairs(buttons) do 
