@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-parameter
 local player = {}
 local sprite = require("modules.sprite")
 local pause = require("modules.pause")
