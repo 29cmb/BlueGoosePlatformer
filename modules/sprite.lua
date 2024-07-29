@@ -12,6 +12,7 @@ local sprite = {
     ["WinButton"] = "images/WinButton.png",
     ["MoveButton"] = "images/MoveButton.png",
     ["ScaleButton"] = "images/ScaleButton.png",
+    ["PaintButton"] = "images/PaintButton.png",
     ["EndFlag"] = "images/EndFlag.png",
     ["SaveButton"] = "images/SaveButton.png",
     ["MainMenu"] = "images/MainMenu.png",

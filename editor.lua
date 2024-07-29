@@ -78,7 +78,7 @@ function editor:Load()
     self.buttons = {
         ["Player"] = {
             ["Sprite"] = Sprites.PlayerButton,
-            ["Transform"] = {10, 10, 75, 75},
+            ["Transform"] = {10, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -91,7 +91,7 @@ function editor:Load()
         },
         ["Spike"] = {
             ["Sprite"] = Sprites.SpikeButton,
-            ["Transform"] = {90, 10, 75, 75},
+            ["Transform"] = {70, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -104,7 +104,7 @@ function editor:Load()
         },
         ["Platform"] = {
             ["Sprite"] = Sprites.PlatformButton,
-            ["Transform"] = {170, 10, 75, 75},
+            ["Transform"] = {130, 10, 55, 55},
             ["IsVisible"] = function() 
                 return true
             end,
@@ -117,7 +117,7 @@ function editor:Load()
         },
         ["Water"] = {
             ["Sprite"] = Sprites.WaterButton,
-            ["Transform"] = {250, 10, 75, 75},
+            ["Transform"] = {190, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -130,7 +130,7 @@ function editor:Load()
         },
         ["Sponge"] = {
             ["Sprite"] = Sprites.SpongeButton,
-            ["Transform"] = {330, 10, 75, 75},
+            ["Transform"] = {250, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -143,7 +143,7 @@ function editor:Load()
         },
         ["Win"] ={
             ["Sprite"] = Sprites.WinButton,
-            ["Transform"] = {410, 10, 75, 75},
+            ["Transform"] = {310, 10, 55, 55},
             ["IsVisible"] = function() 
                 return true
             end,
@@ -156,7 +156,7 @@ function editor:Load()
         },
         ["Move"] = {
             ["Sprite"] = Sprites.MoveButton,
-            ["Transform"] = {490, 10, 75, 75},
+            ["Transform"] = {370, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -169,7 +169,7 @@ function editor:Load()
         },
         ["Scale"] = {
             ["Sprite"] = Sprites.ScaleButton,
-            ["Transform"] = {570, 10, 75, 75},
+            ["Transform"] = {430, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -180,9 +180,22 @@ function editor:Load()
                 placeMode = "scale"
             end
         },
+        ["Paint"] = {
+            ["Sprite"] = Sprites.PaintButton,
+            ["Transform"] = {490, 10, 55, 55},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "paint"
+            end,
+            ["Callback"] = function()
+                placeMode = "paint"
+            end
+        },
         ["Delete"] = {
             ["Sprite"] = Sprites.DeleteButton,
-            ["Transform"] = {650, 10, 75, 75},
+            ["Transform"] = {550, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -195,7 +208,7 @@ function editor:Load()
         },
         ["Save"] = {
             ["Sprite"] = Sprites.SaveButton,
-            ["Transform"] = {730, 10, 75, 75},
+            ["Transform"] = {610, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -302,7 +315,7 @@ function editor:Draw()
         love.graphics.setColor(1,1,1,1)
     end
     
-    if placeMode == "platform" then
+    if placeMode == "platform" or placeMode == "paint" then
         for _, s in ipairs(self.HSVSliders) do
             if s.Sprite == "Saturation" then
                 love.graphics.setColor(1,1,1,1)
@@ -340,10 +353,10 @@ function editor:Draw()
         if button.IsVisible() then
             if button.Selected() then
                 love.graphics.setColor(0.8,0.8,0.8)
-                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2], 0, button.Transform[3] / 75,  button.Transform[4] / 75)
                 love.graphics.setColor(1,1,1,1)
             else
-                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2], 0, button.Transform[3] / 75,  button.Transform[4] / 75)
             end
         end
        
@@ -404,7 +417,7 @@ function editor:MousePressed(x, y, button)
         end
 
         for _, s in ipairs(self.HSVSliders) do
-            if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and placeMode == "platform" then
+            if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and (placeMode == "platform" or placeMode == "paint") then
                 local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
                 s.Callback(sliderPercent)
                 sliding = true
@@ -503,6 +516,18 @@ function editor:MousePressed(x, y, button)
                     break
                 end
             end
+        elseif placeMode == "paint" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    local r, g, b = HSVtoRGB(hue, saturation, brightness)
+                    
+                    value.Color.R = r 
+                    value.Color.G = g 
+                    value.Color.B = b
+                    
+                    break
+                end
+            end
         end
     end
 end
@@ -572,14 +597,14 @@ end
 
 function editor:MouseMoved(x, y, dx, dy)
     for _, s in ipairs(self.HSVSliders) do
-        if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding and placeMode == "platform" then
+        if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding and (placeMode == "platform" or placeMode == "paint") then
             local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
             s.Callback(sliderPercent)
             
             return
         end
     end
-
+    
     if movingObject ~= nil then
         if placeMode == "move" then
             movingObject.X = movingObject.X + dx
