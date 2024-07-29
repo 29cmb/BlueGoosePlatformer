@@ -13,6 +13,8 @@ editor.CameraData = {
     ["CamSpeed"] = 500
 }
 
+local dcX = 0
+local dcY = 0
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 
 local level = {
@@ -28,6 +30,7 @@ local sliding = false
 local hue = 0.0
 local saturation = 1.0
 local brightness = 1.0
+local movingObject = nil
 
 function HSVtoRGB(h, s, v)
     if s <= 0 then return v,v,v end
@@ -151,9 +154,35 @@ function editor:Load()
                 placeMode = "win"
             end
         },
+        ["Move"] = {
+            ["Sprite"] = Sprites.MoveButton,
+            ["Transform"] = {490, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "move"
+            end,
+            ["Callback"] = function()
+                placeMode = "move"
+            end
+        },
+        ["Scale"] = {
+            ["Sprite"] = Sprites.ScaleButton,
+            ["Transform"] = {570, 10, 75, 75},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "scale"
+            end,
+            ["Callback"] = function()
+                placeMode = "scale"
+            end
+        },
         ["Delete"] = {
             ["Sprite"] = Sprites.DeleteButton,
-            ["Transform"] = {490, 10, 75, 75},
+            ["Transform"] = {650, 10, 75, 75},
             ["IsVisible"] = function()
                 return true
             end,
@@ -166,7 +195,7 @@ function editor:Load()
         },
         ["Save"] = {
             ["Sprite"] = Sprites.SaveButton,
-            ["Transform"] = {570, 10, 75, 75},
+            ["Transform"] = {730, 10, 75, 75},
             ["IsVisible"] = function()
                 return true
             end,
@@ -296,7 +325,7 @@ function editor:Draw()
         love.graphics.setColor(r,g,b,1)
         love.graphics.rectangle("fill", 10, 180, 25, 25)
     end
-
+    
     love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
         love.graphics.setColor(1,1,1,1)
@@ -341,6 +370,11 @@ function editor:Update(dt)
         if love.keyboard.isDown(key) then 
             cX = cX + self.CameraData.CamSpeed * data[1] * dt
             cY = cY + self.CameraData.CamSpeed * data[2] * dt
+
+            if placeMode == "move" and movingObject ~= nil then
+                movingObject.X = movingObject.X - data[1] * dt * self.CameraData.CamSpeed
+                movingObject.Y = movingObject.Y - data[2] * dt * self.CameraData.CamSpeed
+            end
         end
     end
 
@@ -422,13 +456,34 @@ function editor:MousePressed(x, y, button)
                     table.remove(level.Hazards, index)
                 end
             end
+        elseif placeMode == "move" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                    break
+                end
+            end
+
+            for index, value in pairs(level.Gates) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                    break
+                end
+            end
+
+            for index, value in pairs(level.Hazards) do
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W or 65, value.H or 65) then 
+                    movingObject = value 
+                    break
+                end
+            end
         end
     end
 end
 
 function editor:MouseReleased(x, y)
     sliding = false
-
+    movingObject = nil
     if placingPlatform == true then
         local sX = math.abs(x - mX)
         local sY = math.abs(y - mY)
@@ -466,13 +521,13 @@ function editor:MouseReleased(x, y)
             })
         end
         
-
+       
         placingPlatform = false
         mX, mY = 0, 0
     end
 end
 
-function editor:MouseMoved(x, y)
+function editor:MouseMoved(x, y, dx, dy)
     for _, s in ipairs(self.HSVSliders) do
         if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding and placeMode == "platform" then
             local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
@@ -480,6 +535,12 @@ function editor:MouseMoved(x, y)
             
             return
         end
+    end
+
+    if movingObject ~= nil then
+        print(x, y)
+        movingObject.X = movingObject.X + dx
+        movingObject.Y = movingObject.Y + dy
     end
 end
 

@@ -203,8 +203,8 @@ function love.mousereleased(x, y)
     if editor.InEditor == true then editor:MouseReleased(x, y) return end
 end
 
-function love.mousemoved(x, y)
-    if editor.InEditor == true then editor:MouseMoved(x,y) return end
+function love.mousemoved(x, y, dx, dy)
+    if editor.InEditor == true then editor:MouseMoved(x,y, dx, dy) return end
 end
 
 function beginContact(a, b)
