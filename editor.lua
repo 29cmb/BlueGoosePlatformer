@@ -24,6 +24,33 @@ local level = {
 
 local fileName = nil
 
+local sliding = false
+local hue = 0.0
+local saturation = 1.0
+local brightness = 1.0
+
+function HSVtoRGB(h, s, v)
+    if s <= 0 then return v,v,v end
+    h = h*6
+    local c = v*s
+    local x = (1-math.abs((h%2)-1))*c
+    local m,r,g,b = (v-c), 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r+m, g+m, b+m
+end
+
 local function tableToString(tbl, indent)
     local result = "{\n"
     local nextIndent = indent .. "    "
@@ -158,6 +185,60 @@ function editor:Load()
         },
         
     }
+    
+    self.HSVSliders = {
+        {
+            Sprite = "Hue",
+            Transform = {10, 90, 200, 25},
+            SliderPos = function ()
+                return (10 + (hue * 200))
+            end,
+            Callback = function (percentage)
+                hue = percentage
+                if hue > 1.0 then
+                    hue = 1.0
+                end
+                if hue < 0.0 then
+                    hue = 0.0
+                end
+            end
+        },
+        
+        {
+            Sprite = "Saturation",
+            Transform = {10, 120, 200, 25},
+            SliderPos = function ()
+                return (10 + (saturation * 200))
+            end,
+            Callback = function (percentage)
+                saturation = percentage
+                if saturation > 1.0 then
+                    saturation = 1.0
+                end
+                if saturation < 0.0 then
+                    saturation = 0.0
+                end
+            end
+        },
+    
+        {
+            Sprite = "Brightness",
+            Transform = {10, 150, 200, 25},
+            SliderPos = function ()
+                return (10 + (brightness * 200))
+            end,
+            Callback = function (percentage)
+                brightness = percentage
+                if brightness > 1.0 then
+                    brightness = 1.0
+                end
+                if brightness < 0.0 then
+                    brightness = 0.0
+                end
+            end
+        }
+    }
+
     self.IsLoaded = true
 end
 
@@ -166,7 +247,7 @@ local placingPlatform = false
 
 function editor:Draw()
     for _,platform in pairs(level.Platforms) do
-        love.graphics.setColor(platform.Color.R, platform.Color.B, platform.Color.G)
+        love.graphics.setColor(platform.Color.R, platform.Color.G, platform.Color.B)
         love.graphics.rectangle("fill", platform.X + self.CameraData.CameraX, platform.Y + self.CameraData.CameraY, platform.W, platform.H)
         love.graphics.setColor(1, 1, 1)
     end
@@ -191,10 +272,34 @@ function editor:Draw()
         love.graphics.rectangle("fill", math.min(mX, love.mouse.getX()), math.min(mY, love.mouse.getY()), sX, sY)
         love.graphics.setColor(1,1,1,1)
     end
+    
+    if placeMode == "platform" then
+        for _, s in ipairs(self.HSVSliders) do
+            if s.Sprite == "Saturation" then
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.rectangle("fill", s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4])
+    
+                local r,g,b = HSVtoRGB(hue, 1, brightness)
+                love.graphics.setColor(r,g,b,1)
+            elseif s.Sprite == "Brightness" then
+                local r,g,b = HSVtoRGB(hue, saturation, 1)
+                love.graphics.setColor(r,g,b,1)
+            end     
+    
+            love.graphics.draw(Sprites[s.Sprite], s.Transform[1], s.Transform[2], 0)
+            
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(Sprites.Slider, s.SliderPos(), s.Transform[2], 0, 1, 1, 5)
+        end
+
+        local r,g,b = HSVtoRGB(hue, saturation, brightness)
+        love.graphics.setColor(r,g,b,1)
+        love.graphics.rectangle("fill", 10, 180, 25, 25)
+    end
 
     love.graphics.setColor(1, 1, 1, 0.5)
-    love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
-    love.graphics.setColor(1,1,1,1)
+        love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
+        love.graphics.setColor(1,1,1,1)
 
     if level.End then 
         love.graphics.setColor(1, 1, 1, 0.5)
@@ -259,6 +364,16 @@ function editor:MousePressed(x, y, button)
             end
         end
 
+        for _, s in ipairs(self.HSVSliders) do
+            if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and placeMode == "platform" then
+                local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
+                s.Callback(sliderPercent)
+                sliding = true
+                
+                return
+            end
+        end
+
         if buttonPressed == true then return end
         if placeMode == "startPos" then 
             level.Start.X = x - self.CameraData.CameraX - 10
@@ -312,21 +427,26 @@ function editor:MousePressed(x, y, button)
 end
 
 function editor:MouseReleased(x, y)
+    sliding = false
+
     if placingPlatform == true then
         local sX = math.abs(x - mX)
         local sY = math.abs(y - mY)
 
         if placeMode == "platform" then 
             print("platform")
+            
+            local r, g, b = HSVtoRGB(hue, saturation, brightness)
+
             table.insert(level.Platforms, {
                 ["X"] = math.min(mX, x) - self.CameraData.CameraX,
                 ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
                 ["W"] = sX,
                 ["H"] = sY,
                 ["Color"] = {
-                    ["R"] = 1,
-                    ["G"] = 0,
-                    ["B"] = 0
+                    ["R"] = r,
+                    ["G"] = g,
+                    ["B"] = b
                 }
             })
         elseif placeMode == "waterPlatform" then
@@ -349,6 +469,17 @@ function editor:MouseReleased(x, y)
 
         placingPlatform = false
         mX, mY = 0, 0
+    end
+end
+
+function editor:MouseMoved(x, y)
+    for _, s in ipairs(self.HSVSliders) do
+        if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding and placeMode == "platform" then
+            local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
+            s.Callback(sliderPercent)
+            
+            return
+        end
     end
 end
 

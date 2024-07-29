@@ -203,6 +203,10 @@ function love.mousereleased(x, y)
     if editor.InEditor == true then editor:MouseReleased(x, y) return end
 end
 
+function love.mousemoved(x, y)
+    if editor.InEditor == true then editor:MouseMoved(x,y) return end
+end
+
 function beginContact(a, b)
     if a:getUserData() == "Player" then
         if b:getUserData() == "Spike" and player.IsWater == false then 
