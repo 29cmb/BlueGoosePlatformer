@@ -8,6 +8,7 @@ local utils = require("modules.utils")
 local fonts = require("modules.font")
 local pause = require('modules.pause')
 local audio = require("modules.audio")
+local win = require('modules.win')
 
 local inMenu = true
 local levelPage = 1
@@ -130,6 +131,7 @@ function love.load()
     if audio.IsLoaded == false then audio:Init() end
     if fonts.IsLoaded == false then fonts:Load() end
     if pause.IsLoaded == false then pause:Load() end
+    if win.IsLoaded == false then win:Load() end
     if editor.InEditor == true then editor:Load() return end
     
     world:setCallbacks(beginContact, endContact)
@@ -163,6 +165,7 @@ function love.draw()
         level:draw()
         player:draw()
         pause:Draw()
+        win:Draw()
     end 
 end
 
@@ -182,14 +185,16 @@ end
 function love.keypressed(key)
     if key == "j" and editor.InEditor == false then 
         player:WaterToggle()
-    elseif key == "escape" and (inMenu == false or editor.InEditor == true) then
+    elseif key == "escape" and (inMenu == false or editor.InEditor == true) and win.WinVisible == false then
         pause.Paused = not pause.Paused
     end
 end
 
 function love.mousepressed(x, y, button)
+    if win.WinVisible == true then win:MouseClick(x, y) return end
     if pause.Paused == true then pause:MouseClick(x, y) return end
     if editor.InEditor == true then editor:MousePressed(x, y, button) return end
+    
     if inMenu == true then 
         for _,btn in pairs(menuButtons) do 
             if utils:CheckCollision(x, y, 1, 1, btn.Transform[1], btn.Transform[2], btn.Transform[3], btn.Transform[4]) then 
@@ -213,6 +218,8 @@ function beginContact(a, b)
             player:YieldRespawn()
         elseif b:getUserData() == "Sponge" and player.IsWater == true then
             player:YieldRespawn()
+        elseif b:getUserData() == "Flag" then
+            win.WinVisible = true
         end 
     end
 end

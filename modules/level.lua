@@ -10,6 +10,7 @@ end
 function level:loadLevel(data)
     print(data)
     if data.Start then self.map.Start = data.Start end
+    if data.End then self.map.End = data.End end
     for _,platform in pairs(data.Platforms) do 
         local body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")
         local shape = love.physics.newRectangleShape(platform.W, platform.H)
@@ -75,6 +76,16 @@ function level:loadLevel(data)
         player.body:setX(self.map.Start.X)
         player.body:setY(self.map.Start.Y)
     end
+
+    if self.map.End then 
+        local body = love.physics.newBody(world, self.map.End.X + (60 / 2), self.map.End.Y + (60 / 2), "static")
+        local shape = love.physics.newRectangleShape(60, 60)
+        local fixutre = love.physics.newFixture(body, shape)
+        fixutre:setUserData("Flag")
+        fixutre:setSensor(true)
+
+        self.map.End.Fixture = fixutre
+    end
 end
 
 function level:Unload()
@@ -84,18 +95,26 @@ end
 
 function level:draw()
     if self.map ~= {} then 
-        for _,platform in pairs(self.map) do 
-            if platform.type == "Platform" then
-                love.graphics.setColor(platform.color.R, platform.color.G, platform.color.B)
-                love.graphics.rectangle("fill", platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, platform.transform[3], platform.transform[4])
-                love.graphics.setColor(1, 1, 1)
-            elseif platform.type == "Spike" then
-                love.graphics.draw(sprite.Spike, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY)
-            elseif platform.type == "Sponge" then 
-                love.graphics.draw(sprite.Sponge, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 536, platform.transform[4] / 350)
-            elseif platform.type == "Gate" then 
-                love.graphics.draw(sprite.Water, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 643, platform.transform[4] / 360)
+        for _,platform in pairs(self.map) do
+            if type(platform) == "table" then 
+                if platform.type then 
+                    if platform.type == "Platform" then
+                        love.graphics.setColor(platform.color.R, platform.color.B, platform.color.G)
+                        love.graphics.rectangle("fill", platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, platform.transform[3], platform.transform[4])
+                        love.graphics.setColor(1, 1, 1)
+                    elseif platform.type == "Spike" then
+                        love.graphics.draw(sprite.Spike, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY)
+                    elseif platform.type == "Sponge" then 
+                        love.graphics.draw(sprite.Sponge, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 536, platform.transform[4] / 350)
+                    elseif platform.type == "Gate" then 
+                        love.graphics.draw(sprite.Water, platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, 0, platform.transform[3] / 643, platform.transform[4] / 360)
+                    end
+                end
             end
+        end
+
+        if self.map.End then 
+            love.graphics.draw(sprite.EndFlag, self.map.End.X - player.CameraData.CameraX, self.map.End.Y - player.CameraData.CameraY)
         end
     end
 end

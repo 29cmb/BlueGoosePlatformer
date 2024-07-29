@@ -3,6 +3,7 @@ local player = {}
 local sprite = require("modules.sprite")
 local pause = require("modules.pause")
 local level = require("modules.level")
+local win   = require("modules.win")
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
 local respawning = false
 
@@ -61,10 +62,8 @@ function player:update(dt)
         self.MovementData.OnGround = true
     end
 
-    
-
     for key, data in pairs(movementDirections) do 
-        if love.keyboard.isDown(key) and pause.Paused == false then
+        if love.keyboard.isDown(key) and (pause.Paused == false and win.WinVisible == false) then
             local impulseX = 0
             local impulseY = 0
             

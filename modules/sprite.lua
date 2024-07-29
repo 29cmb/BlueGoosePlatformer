@@ -21,7 +21,8 @@ local sprite = {
     ["Hue"] = "images/hue.png",
     ["Saturation"] = "images/saturation.png",
     ["Brightness"] = "images/brightness.png",
-    ["Slider"] = "images/slider.png"
+    ["Slider"] = "images/slider.png",
+    ["WinScreen"] = "images/WinScreen.png"
 }
 sprite.IsLoaded = false
 
