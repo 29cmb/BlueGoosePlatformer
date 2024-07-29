@@ -99,7 +99,7 @@ function level:draw()
             if type(platform) == "table" then 
                 if platform.type then 
                     if platform.type == "Platform" then
-                        love.graphics.setColor(platform.color.R, platform.color.B, platform.color.G)
+                        love.graphics.setColor(platform.color.R, platform.color.G, platform.color.B)
                         love.graphics.rectangle("fill", platform.transform[1] - player.CameraData.CameraX, platform.transform[2] - player.CameraData.CameraY, platform.transform[3], platform.transform[4])
                         love.graphics.setColor(1, 1, 1)
                     elseif platform.type == "Spike" then
