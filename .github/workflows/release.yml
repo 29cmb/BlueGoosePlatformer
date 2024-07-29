@@ -16,7 +16,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run workflow to build
+    - name: Run "Create .love file and build to .exe" workflow
       uses: convictional/trigger-workflow-and-wait@v1.6.1
       with:
         owner: ${{ github.repository_owner }}
@@ -29,12 +29,20 @@ jobs:
 
     - name: Download artifact
       uses: actions/download-artifact@v3
+      continue-on-error: true
       with:
         name: Game Build
         path: ./release-artifacts
 
+    - name: Check if artifact was downloaded
+      id: check_files
+      uses: andstor/file-existence-action@v2
+      with:
+        files: "./release-artifacts/Game Build.zip"
+
     - name: Create Release
       id: create_release
+      if: steps.check_files.outputs.files_exists == 'true'
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -45,6 +53,7 @@ jobs:
         prerelease: false
 
     - name: Upload Release Asset
+      if: steps.check_files.outputs.files_exists == 'true'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -53,3 +62,9 @@ jobs:
         asset_path: ./release-artifacts/Game Build.zip
         asset_name: GameBuild-${{ github.event.inputs.version }}.zip
         asset_content_type: application/zip
+
+    - name: Notify about missing artifact
+      if: steps.check_files.outputs.files_exists == 'false'
+      run: |
+        echo "The Game Build artifact was not found. Please check the 'Create .love file and build to .exe' workflow."
+        exit 1
