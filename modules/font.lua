@@ -1,6 +1,6 @@
 local fonts = {
-    ["Valentiny"] = {"fonts/Valentiny.ttf", 80},
-    ["ValentinySubtext"] = {"fonts/Valentiny.ttf", 40}
+    ["Valentiny"] = {"Fonts/Valentiny.ttf", 80},
+    ["ValentinySubtext"] = {"Fonts/Valentiny.ttf", 40}
 }
 fonts.IsLoaded = false
 
