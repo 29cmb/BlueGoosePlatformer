@@ -375,6 +375,11 @@ function editor:Update(dt)
                 movingObject.X = movingObject.X - data[1] * dt * self.CameraData.CamSpeed
                 movingObject.Y = movingObject.Y - data[2] * dt * self.CameraData.CamSpeed
             end
+            
+            if placeMode == "scale" and movingObject ~= nil then
+                movingObject.W = movingObject.W - data[1] * dt * self.CameraData.CamSpeed
+                movingObject.H = movingObject.H - data[2] * dt * self.CameraData.CamSpeed
+            end
         end
     end
 
@@ -477,17 +482,55 @@ function editor:MousePressed(x, y, button)
                     break
                 end
             end
+        elseif placeMode == "scale" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                    break
+                end
+            end
+
+            for index, value in pairs(level.Gates) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                break
+                end
+            end
+            
+            for index, value in pairs(level.Hazards) do
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W or 65, value.H or 65) then 
+                    movingObject = value 
+                    break
+                end
+            end
         end
     end
 end
 
 function editor:MouseReleased(x, y)
     sliding = false
-    movingObject = nil
+    
+    
+    if movingObject ~= nil then
+        if placeMode == "scale" then
+            if movingObject.W < 0 then
+                movingObject.X = movingObject.X + movingObject.W
+            end
+            
+            if movingObject.H < 0 then
+                movingObject.Y = movingObject.Y + movingObject.H
+            end
+            
+            movingObject.W = math.abs(movingObject.W)
+            movingObject.H = math.abs(movingObject.H)
+        end
+        movingObject = nil
+    end
+
     if placingPlatform == true then
         local sX = math.abs(x - mX)
         local sY = math.abs(y - mY)
-
+        
         if placeMode == "platform" then 
             print("platform")
             
@@ -538,9 +581,14 @@ function editor:MouseMoved(x, y, dx, dy)
     end
 
     if movingObject ~= nil then
-        print(x, y)
-        movingObject.X = movingObject.X + dx
-        movingObject.Y = movingObject.Y + dy
+        if placeMode == "move" then
+            movingObject.X = movingObject.X + dx
+            movingObject.Y = movingObject.Y + dy
+        elseif placeMode == "scale" then
+            movingObject.W = movingObject.W + dx
+            movingObject.H = movingObject.H + dy
+        end
+        
     end
 end
 
