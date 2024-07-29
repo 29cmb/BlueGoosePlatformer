@@ -3,6 +3,7 @@ local Sprites = require("modules.sprite")
 local utils = require("modules.utils")
 local fonts = require("modules.font")
 local pause = require("modules.pause")
+
 editor.InEditor = false
 editor.IsLoaded = false
 
@@ -12,6 +13,8 @@ editor.CameraData = {
     ["CamSpeed"] = 500
 }
 
+local dcX = 0
+local dcY = 0
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 
 local level = {
@@ -22,6 +25,34 @@ local level = {
 }
 
 local fileName = nil
+
+local sliding = false
+local hue = 0.0
+local saturation = 1.0
+local brightness = 1.0
+local movingObject = nil
+
+function HSVtoRGB(h, s, v)
+    if s <= 0 then return v,v,v end
+    h = h*6
+    local c = v*s
+    local x = (1-math.abs((h%2)-1))*c
+    local m,r,g,b = (v-c), 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r+m, g+m, b+m
+end
 
 local function tableToString(tbl, indent)
     local result = "{\n"
@@ -47,7 +78,7 @@ function editor:Load()
     self.buttons = {
         ["Player"] = {
             ["Sprite"] = Sprites.PlayerButton,
-            ["Transform"] = {10, 10, 75, 75},
+            ["Transform"] = {10, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -60,7 +91,7 @@ function editor:Load()
         },
         ["Spike"] = {
             ["Sprite"] = Sprites.SpikeButton,
-            ["Transform"] = {90, 10, 75, 75},
+            ["Transform"] = {70, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -73,7 +104,7 @@ function editor:Load()
         },
         ["Platform"] = {
             ["Sprite"] = Sprites.PlatformButton,
-            ["Transform"] = {170, 10, 75, 75},
+            ["Transform"] = {130, 10, 55, 55},
             ["IsVisible"] = function() 
                 return true
             end,
@@ -86,7 +117,7 @@ function editor:Load()
         },
         ["Water"] = {
             ["Sprite"] = Sprites.WaterButton,
-            ["Transform"] = {250, 10, 75, 75},
+            ["Transform"] = {190, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -99,7 +130,7 @@ function editor:Load()
         },
         ["Sponge"] = {
             ["Sprite"] = Sprites.SpongeButton,
-            ["Transform"] = {330, 10, 75, 75},
+            ["Transform"] = {250, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -112,7 +143,7 @@ function editor:Load()
         },
         ["Win"] ={
             ["Sprite"] = Sprites.WinButton,
-            ["Transform"] = {410, 10, 75, 75},
+            ["Transform"] = {310, 10, 55, 55},
             ["IsVisible"] = function() 
                 return true
             end,
@@ -123,9 +154,48 @@ function editor:Load()
                 placeMode = "win"
             end
         },
+        ["Move"] = {
+            ["Sprite"] = Sprites.MoveButton,
+            ["Transform"] = {370, 10, 55, 55},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "move"
+            end,
+            ["Callback"] = function()
+                placeMode = "move"
+            end
+        },
+        ["Scale"] = {
+            ["Sprite"] = Sprites.ScaleButton,
+            ["Transform"] = {430, 10, 55, 55},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "scale"
+            end,
+            ["Callback"] = function()
+                placeMode = "scale"
+            end
+        },
+        ["Paint"] = {
+            ["Sprite"] = Sprites.PaintButton,
+            ["Transform"] = {490, 10, 55, 55},
+            ["IsVisible"] = function()
+                return true
+            end,
+            ["Selected"] = function()
+                return placeMode == "paint"
+            end,
+            ["Callback"] = function()
+                placeMode = "paint"
+            end
+        },
         ["Delete"] = {
             ["Sprite"] = Sprites.DeleteButton,
-            ["Transform"] = {490, 10, 75, 75},
+            ["Transform"] = {550, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -138,7 +208,7 @@ function editor:Load()
         },
         ["Save"] = {
             ["Sprite"] = Sprites.SaveButton,
-            ["Transform"] = {570, 10, 75, 75},
+            ["Transform"] = {610, 10, 55, 55},
             ["IsVisible"] = function()
                 return true
             end,
@@ -157,6 +227,60 @@ function editor:Load()
         },
         
     }
+    
+    self.HSVSliders = {
+        {
+            Sprite = "Hue",
+            Transform = {10, 90, 200, 25},
+            SliderPos = function ()
+                return (10 + (hue * 200))
+            end,
+            Callback = function (percentage)
+                hue = percentage
+                if hue > 1.0 then
+                    hue = 1.0
+                end
+                if hue < 0.0 then
+                    hue = 0.0
+                end
+            end
+        },
+        
+        {
+            Sprite = "Saturation",
+            Transform = {10, 120, 200, 25},
+            SliderPos = function ()
+                return (10 + (saturation * 200))
+            end,
+            Callback = function (percentage)
+                saturation = percentage
+                if saturation > 1.0 then
+                    saturation = 1.0
+                end
+                if saturation < 0.0 then
+                    saturation = 0.0
+                end
+            end
+        },
+    
+        {
+            Sprite = "Brightness",
+            Transform = {10, 150, 200, 25},
+            SliderPos = function ()
+                return (10 + (brightness * 200))
+            end,
+            Callback = function (percentage)
+                brightness = percentage
+                if brightness > 1.0 then
+                    brightness = 1.0
+                end
+                if brightness < 0.0 then
+                    brightness = 0.0
+                end
+            end
+        }
+    }
+
     self.IsLoaded = true
 end
 
@@ -165,7 +289,7 @@ local placingPlatform = false
 
 function editor:Draw()
     for _,platform in pairs(level.Platforms) do
-        love.graphics.setColor(platform.Color.R, platform.Color.B, platform.Color.G)
+        love.graphics.setColor(platform.Color.R, platform.Color.G, platform.Color.B)
         love.graphics.rectangle("fill", platform.X + self.CameraData.CameraX, platform.Y + self.CameraData.CameraY, platform.W, platform.H)
         love.graphics.setColor(1, 1, 1)
     end
@@ -190,10 +314,34 @@ function editor:Draw()
         love.graphics.rectangle("fill", math.min(mX, love.mouse.getX()), math.min(mY, love.mouse.getY()), sX, sY)
         love.graphics.setColor(1,1,1,1)
     end
+    
+    if placeMode == "platform" or placeMode == "paint" then
+        for _, s in ipairs(self.HSVSliders) do
+            if s.Sprite == "Saturation" then
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.rectangle("fill", s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4])
+    
+                local r,g,b = HSVtoRGB(hue, 1, brightness)
+                love.graphics.setColor(r,g,b,1)
+            elseif s.Sprite == "Brightness" then
+                local r,g,b = HSVtoRGB(hue, saturation, 1)
+                love.graphics.setColor(r,g,b,1)
+            end     
+    
+            love.graphics.draw(Sprites[s.Sprite], s.Transform[1], s.Transform[2], 0)
+            
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(Sprites.Slider, s.SliderPos(), s.Transform[2], 0, 1, 1, 5)
+        end
 
+        local r,g,b = HSVtoRGB(hue, saturation, brightness)
+        love.graphics.setColor(r,g,b,1)
+        love.graphics.rectangle("fill", 10, 180, 25, 25)
+    end
+    
     love.graphics.setColor(1, 1, 1, 0.5)
-    love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
-    love.graphics.setColor(1,1,1,1)
+        love.graphics.draw(Sprites.Player, level.Start.X + self.CameraData.CameraX, level.Start.Y + self.CameraData.CameraY)
+        love.graphics.setColor(1,1,1,1)
 
     if level.End then 
         love.graphics.setColor(1, 1, 1, 0.5)
@@ -205,10 +353,10 @@ function editor:Draw()
         if button.IsVisible() then
             if button.Selected() then
                 love.graphics.setColor(0.8,0.8,0.8)
-                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2], 0, button.Transform[3] / 75,  button.Transform[4] / 75)
                 love.graphics.setColor(1,1,1,1)
             else
-                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2])
+                love.graphics.draw(button.Sprite, button.Transform[1], button.Transform[2], 0, button.Transform[3] / 75,  button.Transform[4] / 75)
             end
         end
        
@@ -233,8 +381,18 @@ function editor:Update(dt)
     if pause.Paused == true then return end
     for key, data in pairs(directions) do 
         if love.keyboard.isDown(key) then 
-            cX = self.CameraData.CamSpeed * data[1] * dt
-            cY = self.CameraData.CamSpeed * data[2] * dt
+            cX = cX + self.CameraData.CamSpeed * data[1] * dt
+            cY = cY + self.CameraData.CamSpeed * data[2] * dt
+
+            if placeMode == "move" and movingObject ~= nil then
+                movingObject.X = movingObject.X - data[1] * dt * self.CameraData.CamSpeed
+                movingObject.Y = movingObject.Y - data[2] * dt * self.CameraData.CamSpeed
+            end
+            
+            if placeMode == "scale" and movingObject ~= nil then
+                movingObject.W = movingObject.W - data[1] * dt * self.CameraData.CamSpeed
+                movingObject.H = movingObject.H - data[2] * dt * self.CameraData.CamSpeed
+            end
         end
     end
 
@@ -255,6 +413,16 @@ function editor:MousePressed(x, y, button)
             if btn.IsVisible() and utils:CheckCollision(x, y, 1, 1, btn.Transform[1], btn.Transform[2], btn.Transform[3], btn.Transform[4]) then 
                 btn.Callback(editor)
                 buttonPressed = true
+            end
+        end
+
+        for _, s in ipairs(self.HSVSliders) do
+            if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and (placeMode == "platform" or placeMode == "paint") then
+                local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
+                s.Callback(sliderPercent)
+                sliding = true
+                
+                return
             end
         end
 
@@ -306,26 +474,102 @@ function editor:MousePressed(x, y, button)
                     table.remove(level.Hazards, index)
                 end
             end
+        elseif placeMode == "move" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                    break
+                end
+            end
+
+            for index, value in pairs(level.Gates) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                    break
+                end
+            end
+
+            for index, value in pairs(level.Hazards) do
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W or 65, value.H or 65) then 
+                    movingObject = value 
+                    break
+                end
+            end
+        elseif placeMode == "scale" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                    break
+                end
+            end
+
+            for index, value in pairs(level.Gates) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    movingObject = value 
+                break
+                end
+            end
+            
+            for index, value in pairs(level.Hazards) do
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W or 65, value.H or 65) then 
+                    movingObject = value 
+                    break
+                end
+            end
+        elseif placeMode == "paint" then
+            for index, value in pairs(level.Platforms) do 
+                if utils:CheckCollision(x - self.CameraData.CameraX, y - self.CameraData.CameraY, 1, 1, value.X, value.Y, value.W, value.H) then 
+                    local r, g, b = HSVtoRGB(hue, saturation, brightness)
+                    
+                    value.Color.R = r 
+                    value.Color.G = g 
+                    value.Color.B = b
+                    
+                    break
+                end
+            end
         end
     end
 end
 
 function editor:MouseReleased(x, y)
+    sliding = false
+    
+    
+    if movingObject ~= nil then
+        if placeMode == "scale" then
+            if movingObject.W < 0 then
+                movingObject.X = movingObject.X + movingObject.W
+            end
+            
+            if movingObject.H < 0 then
+                movingObject.Y = movingObject.Y + movingObject.H
+            end
+            
+            movingObject.W = math.abs(movingObject.W)
+            movingObject.H = math.abs(movingObject.H)
+        end
+        movingObject = nil
+    end
+
     if placingPlatform == true then
         local sX = math.abs(x - mX)
         local sY = math.abs(y - mY)
-
+        
         if placeMode == "platform" then 
             print("platform")
+            
+            local r, g, b = HSVtoRGB(hue, saturation, brightness)
+
             table.insert(level.Platforms, {
                 ["X"] = math.min(mX, x) - self.CameraData.CameraX,
                 ["Y"] = math.min(mY, y) - self.CameraData.CameraY,
                 ["W"] = sX,
                 ["H"] = sY,
                 ["Color"] = {
-                    ["R"] = 1,
-                    ["G"] = 0,
-                    ["B"] = 0
+                    ["R"] = r,
+                    ["G"] = g,
+                    ["B"] = b
                 }
             })
         elseif placeMode == "waterPlatform" then
@@ -345,9 +589,31 @@ function editor:MouseReleased(x, y)
             })
         end
         
-
+       
         placingPlatform = false
         mX, mY = 0, 0
+    end
+end
+
+function editor:MouseMoved(x, y, dx, dy)
+    for _, s in ipairs(self.HSVSliders) do
+        if utils:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding and (placeMode == "platform" or placeMode == "paint") then
+            local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
+            s.Callback(sliderPercent)
+            
+            return
+        end
+    end
+    
+    if movingObject ~= nil then
+        if placeMode == "move" then
+            movingObject.X = movingObject.X + dx
+            movingObject.Y = movingObject.Y + dy
+        elseif placeMode == "scale" then
+            movingObject.W = movingObject.W + dx
+            movingObject.H = movingObject.H + dy
+        end
+        
     end
 end
 
