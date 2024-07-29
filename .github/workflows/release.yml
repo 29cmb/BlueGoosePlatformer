@@ -1,0 +1,55 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number for the release'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run workflow to build
+      uses: convictional/trigger-workflow-and-wait@v1.6.1
+      with:
+        owner: ${{ github.repository_owner }}
+        repo: ${{ github.event.repository.name }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow_file_name: build-love-file.yml
+        wait_interval: 10
+        trigger_workflow: true
+        wait_workflow: true
+
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: Game Build
+        path: ./release-artifacts
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.event.inputs.version }}
+        release_name: Release ${{ github.event.inputs.version }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release-artifacts/Game Build.zip
+        asset_name: GameBuild-${{ github.event.inputs.version }}.zip
+        asset_content_type: application/zip
